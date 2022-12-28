@@ -1,0 +1,19 @@
+$files=$(git diff HEAD HEAD~ --name-only)
+$temp=$files -split '`r`na'
+$count=$temp.Length
+echo "Total changed $count files"
+$a=0
+For ($i=0; $i -lt $temp.Length; $i++)
+{
+  $name=$temp[$i]
+  echo "this is $name file"
+  if ($name -like "SubFolderA/*")
+    {
+      $a++
+      Write-Host "No of Angular files changes $a"
+    }
+  if ($a -gt 0)
+    {
+      Write-Host "##vso[task.setvariable variable=RunAngular]True"
+    }
+}
