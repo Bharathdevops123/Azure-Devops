@@ -1,5 +1,5 @@
-SOnarQube:
-It is Code analysys tool. Id does the following
+SOnarQube: Open source tool
+It is Code analysys tool. It does the following
 1) Code coverage: shows how much code is covered by the test cases
 2) Bugs : 
 3)Issue : detects the issue
@@ -7,3 +7,30 @@ It is Code analysys tool. Id does the following
 5)Code Smell: Detects there could be a big problem in the code
 6)Duplication : Finds duplicates in the code
 7)Shows No of lines
+
+Installation:
+Linux:
+You can install community edition docker container on Linux server and you can use it for the analysys.
+
+Windows:
+Download the sonar qube files and install it.
+
+Create Service connection in the ADO:
+Create a Token in the Sonarqube by going to Account. Now, Create a Service connection in the ADO. While giving the SonarQube url in the service connection just give
+http:SonarqubeServername:9000  in the service connection.
+
+Agent server Requirements:
+Install Java on the Agent server. check the version which version is suitable for installed sonarQube
+Eg: Java 11 is required for SonarQube 10.2
+
+In the ADO Build pipeline.
+Add SonarQube tasks from the Market place to the Organization.
+Add below Tasks to the build
+1) Prepare Analysis on SonarQube for .net application
+ - Use Standalone scanner mostly
+ - You can also use Integrate with MS build 
+2) Use Java Installer (Select Preinstalled)
+3) Run Code Analysis 
+4) Publist Quality Gate Results (This will upload results to the pipeline)
+
+
