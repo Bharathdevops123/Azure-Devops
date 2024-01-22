@@ -7,6 +7,9 @@ It is Code analysys tool. It does the following
 5)Code Smell: Detects there could be a big problem in the code
 6)Duplication : Finds duplicates in the code
 7)Shows No of lines
+8) Quality Gate: A quality gate is an indicator of code quality that can be configured to give a go/no-go signal on the current release-worthiness of the code. It indicates whether your code is clean and can move forward.
+ * A passing (green) quality gate means the code meets your standard and is ready to be merged.
+ * A failing (red) quality gate means there are issues to address.
 
 Installation:
 Linux:
