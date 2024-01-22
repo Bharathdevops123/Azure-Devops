@@ -1,0 +1,4 @@
+Issues:
+1) Java installed but build is not dedecting.
+Error: ##[error]No agent found in pool XXX which satisfies the specified demands: java, Agent.Version -gtVersion 2.144.0
+Solution: Use Java installer task in the build. The build will stop failing.
