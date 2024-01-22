@@ -1,7 +1,7 @@
 SOnarQube: Open source tool
 It is Code analysys tool. It does the following
 1) Code coverage: shows how much code is covered by the test cases
-2) Bugs : 
+2) Bugs : an unexpected defect, fault, flaw, or imperfection or Problem
 3)Issue : detects the issue
 4)Vulnerabitlities : check for any external security attacks
 5)Code Smell: Detects there could be a big problem in the code
