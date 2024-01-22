@@ -14,6 +14,7 @@ You can install community edition docker container on Linux server and you can u
 
 Windows:
 Download the sonar qube files and install it.
+https://medium.com/kocsistem/sonarqube-installation-on-windows-server-4f6fe95b7440
 
 Create Service connection in the ADO:
 Create a Token in the Sonarqube by going to Account. Now, Create a Service connection in the ADO. While giving the SonarQube url in the service connection just give
