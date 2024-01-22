@@ -1,0 +1,9 @@
+SOnarQube:
+It is Code analysys tool. Id does the following
+1) Code coverage: shows how much code is covered by the test cases
+2) Bugs : 
+3)Issue : detects the issue
+4)Vulnerabitlities : check for any external security attacks
+5)Code Smell: Detects there could be a big problem in the code
+6)Duplication : Finds duplicates in the code
+7)Shows No of lines
