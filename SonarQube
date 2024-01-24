@@ -7,7 +7,7 @@ Session 4 : Maven and Gradle
 Session 5 :
 Session 6 :
 
-It is Code quality and test management tool. It does the following
+SonarQube: It is Code quality and test management tool. It does the following
 1) Code coverage: shows how much code is covered by the test cases
 2) Bugs : a flaw or defect or error in the software's code that causes it to behave unexpectedly or not as intended.
 3)Issue : Any problem which might block the development process, example : a third party driver you identified as dependency is not releasing on time, so it is an issue in your development process.
