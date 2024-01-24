@@ -1,5 +1,11 @@
 SOnarQube: Open source tool
 YT : https://www.youtube.com/watch?v=y8UF7rgtDEo
+Session 1 : Sonarqube
+Session 2 : Sonarqube quality profiles and Gates etc
+Session 3 : postgre installation
+Session 4 : Maven and Gradle
+Session 5 :
+Session 6 :
 
 It is Code quality and test management tool. It does the following
 1) Code coverage: shows how much code is covered by the test cases
