@@ -55,3 +55,12 @@ cd /SonarQube/bin/linux-x86-64
 run  ./sonar.sh start
 
 7) Go to sql server right click on sonarqube Database. Go to options and set Collation = SQL_Latin1_General_CP1_CS_AS
+
+8) try to access http://<servername>:9000
+If sonar qube is not accessible then check in Logs under below path.
+/SonarQube/logs
+you will see 
+sonar.log - gives errors about web, es and other issues
+web.log -- shows error why web application not started
+es.log-- shows any issue with elastic search
+access.log
