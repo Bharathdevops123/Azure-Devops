@@ -56,7 +56,7 @@ run  ./sonar.sh start
 
 7) Go to sql server right click on sonarqube Database. Go to options and set Collation = SQL_Latin1_General_CP1_CS_AS
 
-8) try to access http://<servername>:9000
+8) try to access http://<servername>:9000 or http://ip:9000
 If sonar qube is not accessible then check in Logs under below path.
 /SonarQube/logs
 you will see 
