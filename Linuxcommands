@@ -1,0 +1,9 @@
+Udo: press esc and the u 
+to view a file : cat Filename
+to edit a file: vi filename
+to enter the text press i and then enter
+to save the file press esc and then:wq
+to exit the file without saving the changes press :q
+
+to check Port: netstat -lntp
+to check ip: hostname -ip
