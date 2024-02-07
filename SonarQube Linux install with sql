@@ -1,0 +1,12 @@
+SonarQube Linux install with sql DB
+
+1) down load sonar qube binaries from the below site
+https://binaries.sonarsource.com/?prefix=Distribution/sonarqube/
+Check the latest version zip and copy url and run below command to download
+wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-9.9.4.87374.zip
+This will download the file
+
+2)now unzip the file
+unzip <filename.zip>
+
+3) go to 
