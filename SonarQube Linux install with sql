@@ -1,5 +1,9 @@
 SonarQube Linux install with sql DB
 
+Links for reference
+Database : https://docs.sonarsource.com/sonarqube/latest/setup-and-upgrade/install-the-server/installing-the-database/
+Application: https://docs.sonarsource.com/sonarqube/latest/setup-and-upgrade/install-the-server/installing-sonarqube-from-zip-file/
+
 1) down load sonar qube binaries from the below site
 https://binaries.sonarsource.com/?prefix=Distribution/sonarqube/
 Check the latest version zip and copy url and run below command to download
@@ -9,4 +13,22 @@ This will download the file
 2)now unzip the file
 unzip <filename.zip>
 
-3) go to 
+3) go to /SonarQube/conf/ and add below lines in the sonar.properties file
+sonar.jdbc.username=<username>
+sonar.jdbc.password=<password>
+sonar.jdbc.url=jdbc:sqlserver://<servername>;databaseName=sonar;encrypt=false;trustServerCertificate=true
+sonar.path.data=/SonarQube//data
+sonar.path.temp=//SonarQube//temp
+
+4) go to /etc/sysctl.conf
+add vm.max_map_count=262144
+and then run below command
+sudo sysctl -w vm.max_map_count=262144 
+
+5) Enable port 9000 on the server because sonar qube will run on 9000
+see what are running on port 9000
+lsof -i:9000
+If some thing is running you can kill that process by kill <pid> or
+if any docker conatiner is running you can stop the container
+
+
