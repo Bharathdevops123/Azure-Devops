@@ -4,7 +4,8 @@ Links for reference
 Database : https://docs.sonarsource.com/sonarqube/latest/setup-and-upgrade/install-the-server/installing-the-database/
 Application: https://docs.sonarsource.com/sonarqube/latest/setup-and-upgrade/install-the-server/installing-sonarqube-from-zip-file/
 
-On the Linux server we need to install Java and set the environmental variables. we installed Java open jdk 17.0.9
+**) Install Java and set the environmental variables. we installed Java open jdk 17.0.9
+On the build agent server where we are running build pipeline in ado we used JAva 11.
 
 1) down load sonar qube binaries from the below site
 https://binaries.sonarsource.com/?prefix=Distribution/sonarqube/
