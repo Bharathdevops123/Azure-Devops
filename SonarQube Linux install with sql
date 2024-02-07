@@ -4,9 +4,19 @@ Links for reference
 Database : https://docs.sonarsource.com/sonarqube/latest/setup-and-upgrade/install-the-server/installing-the-database/
 Application: https://docs.sonarsource.com/sonarqube/latest/setup-and-upgrade/install-the-server/installing-sonarqube-from-zip-file/
 
+Create Database :
+-----------------
+Create a databe with the name sonar in sql server management studio.
+Create a user and password.
+run below commands
+SELECT is_read_committed_snapshot_on FROM sys.databases WHERE name='YourSonarQubeDatabase';
+ALTER DATABASE YourSonarQubeDatabase SET READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE;
+
+Install Application on Linux:
+
 **) Install Java and set the environmental variables. we installed Java open jdk 17.0.9 
 
-On the build agent server where we are running build pipeline in ado we used JAva 11.
+On the build agent server where we are running build pipeline in ado we used Java 11. (in the build make sure you user USe JAva task before Run Analysis task)
 
 1) down load sonar qube binaries from the below site
 https://binaries.sonarsource.com/?prefix=Distribution/sonarqube/
@@ -43,3 +53,5 @@ if any docker conatiner is running you can stop the container
 6) go to the path 
 cd /SonarQube/bin/linux-x86-64 
 run  ./sonar.sh start
+
+7) Go to sql server right click on sonarqube Database. Go to options and set Collation = SQL_Latin1_General_CP1_CS_AS
