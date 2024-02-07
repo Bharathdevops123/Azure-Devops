@@ -20,7 +20,9 @@ sonar.jdbc.url=jdbc:sqlserver://<servername>;databaseName=sonar;encrypt=false;tr
 sonar.path.data=/SonarQube//data
 sonar.path.temp=//SonarQube//temp
 
-4) go to /etc/sysctl.conf
+4) check vm.max_map_count 
+command: sysctl vm.max_map_count
+go to /etc/sysctl.conf
 add vm.max_map_count=262144
 and then run below command
 sudo sysctl -w vm.max_map_count=262144 
