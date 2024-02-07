@@ -22,6 +22,7 @@ SonarQube: It is Code quality and test management tool. It does the following
 Installation:
 Linux:
 You can install community edition docker container on Linux server and you can use it for the analysys.
+you can see SonarQube Linux install page
 
 Windows:
 Download the sonar qube files and install it.
