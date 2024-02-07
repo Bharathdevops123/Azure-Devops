@@ -4,7 +4,8 @@ Links for reference
 Database : https://docs.sonarsource.com/sonarqube/latest/setup-and-upgrade/install-the-server/installing-the-database/
 Application: https://docs.sonarsource.com/sonarqube/latest/setup-and-upgrade/install-the-server/installing-sonarqube-from-zip-file/
 
-**) Install Java and set the environmental variables. we installed Java open jdk 17.0.9
+**) Install Java and set the environmental variables. we installed Java open jdk 17.0.9 
+
 On the build agent server where we are running build pipeline in ado we used JAva 11.
 
 1) down load sonar qube binaries from the below site
@@ -14,6 +15,8 @@ In my project i have downloadded 9.9.3.79811.zip
 wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-9.9.3.79811.zip
 This will download the file
 
+*) export SONAR_JAVA_PATH="/usr/bin/java"
+
 2)now unzip the file
 unzip <filename.zip>
 
@@ -21,8 +24,8 @@ unzip <filename.zip>
 sonar.jdbc.username=<username>
 sonar.jdbc.password=<password>
 sonar.jdbc.url=jdbc:sqlserver://<servername>;databaseName=sonar;encrypt=false;trustServerCertificate=true
-sonar.path.data=/SonarQube//data
-sonar.path.temp=//SonarQube//temp
+sonar.path.data=/SonarQube/data
+sonar.path.temp=/SonarQube/temp
 
 4) check vm.max_map_count 
 command: sysctl vm.max_map_count
@@ -37,4 +40,6 @@ lsof -i:9000
 If some thing is running you can kill that process by kill <pid> or
 if any docker conatiner is running you can stop the container
 
-
+6) go to the path 
+cd /SonarQube/bin/linux-x86-64 
+run  ./sonar.sh start
