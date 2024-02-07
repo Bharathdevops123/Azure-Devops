@@ -8,3 +8,4 @@ to exit the file without saving the changes press :q
 to check Port: netstat -lntp
 to check ip: hostname -ip
 View last modified files: ls -lt
+lsof -i:<Port> To know what is running on the port
