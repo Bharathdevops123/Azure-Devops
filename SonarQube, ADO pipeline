@@ -34,7 +34,13 @@ http:SonarqubeServername:9000  in the service connection.
 
 Agent server Requirements:
 Install Java on the Agent server. check the version which version is suitable for installed sonarQube
-Eg: Java 11 is required for SonarQube 10.2
+Eg: Java 17 is required for SonarQube 9.9.3
+[
+On the build agent server what we used in build pipeline we need to install Java 17. 
+(in the build make sure you user USe JAva task before Run Analysis task and select pre installed and select JAVA_HOME_17_X64)
+go to environment variables-->system variables and set the environmental value
+JAVA_HOME_17_X64 = C:\Program Files\Java\jdk-17
+]
 
 In the ADO Build pipeline.
 Add SonarQube tasks from the Market place to the Organization.
