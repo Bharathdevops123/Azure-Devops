@@ -42,6 +42,17 @@ go to environment variables-->system variables and set the environmental value
 JAVA_HOME_17_X64 = C:\Program Files\Java\jdk-17
 ]
 
+Create service connection from Azure to Sonarqube
+Go to ADO --> Project settings --> service connections --Add a new service connection-- give sonar qube url
+http://<servername:9000
+It will ask for token
+
+Go to sonarqube --click on Account on top right corner -- click on Myaccount --click on security -- 
+Enter token name same as serviceconnection name and set to never expire and then generate token.
+Add this token to ADO service connection.
+
+Save token some where you do not loose it
+
 In the ADO Build pipeline.
 Add SonarQube tasks from the Market place to the Organization.
 Add below Tasks to the build
