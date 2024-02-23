@@ -1,0 +1,12 @@
+SonarQube issues and additional features
+1)Move to Developer edition
+If we are getting any error to move to Developer edition then
+Validation of project failed:
+  o To use the property "sonar.branch.name" and analyze branches, Developer Edition or above is required.
+See https://docs.sonarqube.org/latest/analyzing-source-code/branches/branch-analysis/ for more information.
+
+Solution : Add a powershell task after dotnet build and before Run Analysis
+$params = "$env:SONARQUBE_SCANNER_PARAMS" -replace '"sonar.branch.name":"[\w,/,-]*"\,?'
+Write-Host "##vso[task.setvariable variable=SONARQUBE_SCANNER_PARAMS]$params"
+
+This will resolve and developer edition is not needed.
