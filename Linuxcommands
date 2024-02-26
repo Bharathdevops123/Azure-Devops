@@ -1,11 +1,11 @@
 Undo: press esc and the u 
-to view a file : cat Filename
-to edit a file: vi filename
-to enter the text press i and then enter
-to save the file press esc and then:wq
-to exit the file without saving the changes press :q
+cat Filename : to view a file
+vi filename : to edit a file
+i : to enter the text press i and then enter
+press esc and then:wq --> to save the file 
+press :q -->to exit the file without saving the changes 
 
-to check Port: netstat -lntp
-to check ip: hostname -ip
-View last modified files: ls -lt
+netstat -lntp : to check Port
+hostname -ip : to check ip
+ ls -lt : View last modified files
 lsof -i:<Port> To know what is running on the port
