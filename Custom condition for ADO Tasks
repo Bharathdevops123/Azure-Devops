@@ -1,0 +1,8 @@
+Custom condition for ADO Tasks using or operand.
+
+condition: and(succeeded(), or(eq(variables['isDevOrQA'], 'true'), eq(variables['isProd'], 'true')))
+Evalution
+all previous tasks should be succeeded. isDevOrQA = True . isProd = false -- Task will run
+all previous tasks should be succeeded. isDevOrQA = false . isProd = True -- Task will run
+all previous tasks should be succeeded. isDevOrQA = True . isProd = True -- Task will run
+all previous tasks should be succeeded. isDevOrQA = false . isProd = false -- Task will NOT run
