@@ -1,4 +1,4 @@
-Custom condition for ADO Tasks using or operand.
+Custom condition for ADO Tasks using "or" operand.
 
 condition: and(succeeded(), or(eq(variables['isDevOrQA'], 'true'), eq(variables['isProd'], 'true')))
 Evalution
