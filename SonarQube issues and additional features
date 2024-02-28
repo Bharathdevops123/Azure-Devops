@@ -2,7 +2,7 @@ SonarQube issues and additional features
 1) Using SonarQube community edition we can scan only main branch for free
 Solution: Run sonarqube community edition only on Main branch
 
-2)if we scan for dev branch or other if we get error : Move to Developer edition error
+2)Move to Developer edition error
 If we are running sonar scan on a Dev branch using community edition and getting any error to move to Developer edition then
 Validation of project failed:
   o To use the property "sonar.branch.name" and analyze branches, Developer Edition or above is required.
