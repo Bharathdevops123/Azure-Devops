@@ -1,0 +1,21 @@
+Create a folder on the server in home directory
+cd home
+mkdir Agent1
+cd Agent1
+download the agent 
+wget https://vstsagentpackage.azureedge.net/agent/2.181.2/vsts-agent-linux-x64-2.181.2.tar.gz
+
+tar zxvf ~/Downloads/vsts-agent-linux-x64-2.181.2.tar.gz
+
+ ./config.sh
+Give the ADO url till orgaization and give other details as asked
+ ./run.sh
+
+If we do like this if Agent is not running after we close the putty session then we need to install svc.sh
+cd Agent1
+sudo ./svc.sh install
+sudo svc.sh start
+
+by this the agent will keep on running in the background even if we close the putty session
+
+
