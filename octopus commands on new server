@@ -1,0 +1,22 @@
+
+List of commands to execute on New serverfor Octopus release:
+-------------------------------------------------------------
+Install-PackageProvider NuGet -Force
+Install-Module PowerShellGet -Force -AllowClobber
+Import-Module powershellget
+Install-Module SqlChangeAutomation -Force -AllowClobber
+Import-Module SqlChangeAutomation
+
+Get-Module -ListAvailable | Where-Object Name -eq Sqlchangeautomation
+
+Get-Module -ListAvailable | Where-Object Name -eq SqlServer
+
+#Install-Module sqlserver -Force -AllowClobber
+#update-module sqlserver -ErrorAction Stop
+import-module sqlserver -ErrorAction Stop
+
+or
+
+#install-module sqlserver -ErrorAction Stop
+#update-module sqlserver -ErrorAction Stop
+#import-module sqlserver -ErrorAction Stop
