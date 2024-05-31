@@ -1,0 +1,39 @@
+Add Repo A to B (We want to add Repo A to B
+--------------------------------------------
+Clone Repo B git repository to our local
+git clone <gitUrl>
+
+NAvigate to Repo B
+
+cd D:\Repo\B
+
+Create a new branch in Repo B
+------------------------------
+Git branch AddDBRepo
+
+Checkout the branch
+------------------------
+git checkout AddDBRepo
+
+Add the Repo A to B
+---------------------
+git remote add RepoA <http://azuredevops/_git/RepoA>
+
+Download Repo A with commit history to Repo B using fetch command 
+-----------------------------------------------------------------
+
+git fetch OutSystemDatabase --tags
+
+Merge the master branch of Repo A to repo B
+--------------------------------------
+git merge RepoA/master --allow-unrelated-histories
+
+#allow-unrelated-histories by adding this it will not distur the history of Repo B.
+
+
+Push the AddDBRepo branch to Remote
+---------------------------------------------
+git push origin -u AddDBRepo
+
+
+Create a pull request to Repo B to main branch on ADO
