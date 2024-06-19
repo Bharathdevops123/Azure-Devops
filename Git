@@ -1,0 +1,3 @@
+git init - Initializes a Repository
+git config --global user.name "Bharath"  -- Configures username
+git config --global user.email "medojuBharathkumar07@gmail.com"  -- Configures email
