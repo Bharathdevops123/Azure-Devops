@@ -12,7 +12,7 @@ git commit -m "<message> - moves the code to Local Git repository
 Revert a pushed commit in Git: This should be done for shared repo
 -----------------------------------------------------------------
 git revert <commit ID> ---> This command will revert the commit. After the files are reverted you can check in a new commit 
-          with the message revert commit". and then you can push the commit git push origin <branch name>                              https://www.youtube.com/watch?v=H2DuJNWbqLw
+          with the message revert commit". and then you can push the commit git push origin <branch name>. Same like TFVC                           https://www.youtube.com/watch?v=H2DuJNWbqLw
 git revert Head~1 : This reverts last commit
 git revert Head~4 : This reverts last 4 commits
 
