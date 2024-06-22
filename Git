@@ -25,8 +25,13 @@ git commit -- amend --> if you forgot to add a change in the last commit we can 
 git log - gives commit history
 git log -all - gives all commit history
 
-git stash --include-untracked : if you are working on some files and you dont want to delete them for now. you can save them in stash
-
+Stash
+-----
+git stash push --include-untracked -m <stashname>: if you are working on some files and you dont want to delete them for now. you can save them in stash
+git stash list
+git stash apply "stash@{n}" -->  n =0,1,2... this will get our changes from the statsh n but will KEEP the stash
+git stash pop "stash@{n}" -->  n =0,1,2... this will get our changes from the statsh n but will DELETE the stash
+git stash drop "stash@{n}" --> Deletes the stash n
 
 Git File status
 U- Untracked files - new files are there in working directory but they are not added to Git
