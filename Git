@@ -1,5 +1,7 @@
 Git Short cut Udemy Alan rodrigue AZ 400
 -----------------------------------------
+In Git we have working directory, Staging Area, Local git repository and Remote Git repository.
+
 git init - Initializes a Repository
 git config --global user.name "Bharath"  -- Configures username
 git config --global user.email "medojuBharathkumar07@gmail.com"  -- Configures email
