@@ -33,6 +33,8 @@ git stash apply "stash@{n}" -->  n =0,1,2... this will get our changes from the 
 git stash pop "stash@{n}" -->  n =0,1,2... this will get our changes from the statsh n but will DELETE the stash
 git stash drop "stash@{n}" --> Deletes the stash n
 
+git clean --> Removes the files that are nt under version control
+
 Git File status
 U- Untracked files - new files are there in working directory but they are not added to Git
 M - File is modified
