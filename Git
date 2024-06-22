@@ -35,8 +35,8 @@ git push origin <branch> : To Push the code to remote branch or origin
 
 git branch dev : creates a dev branch
 git push origin --delete dev : Deletes remote dev branch
-git branch -d dev: Delete a branch after merge in local
-git branch -D dev: Delete a branch before merge in local
+git branch -d dev: Delete dev branch
+git branch -D dev: Delete dev branch -D means force delete
 
 Merge
 -----
