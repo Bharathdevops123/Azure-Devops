@@ -1,3 +1,13 @@
 git init - Initializes a Repository
 git config --global user.name "Bharath"  -- Configures username
 git config --global user.email "medojuBharathkumar07@gmail.com"  -- Configures email
+git add . - adds files to staging directory
+git add fileA.txt - Adds fileA.txt to staging area
+git status - Give current status of working directory
+git commit -m "<message> - moves the code to Git repository
+git log - gives commit history
+git log -all - gives all commit history
+
+Git File status
+U- Untracked files - new files are there in working directory but they are not added to Git
+M - File is modified
