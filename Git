@@ -3,10 +3,13 @@ Git Short cut Udemy Alan rodrigue AZ 400
 git init - Initializes a Repository
 git config --global user.name "Bharath"  -- Configures username
 git config --global user.email "medojuBharathkumar07@gmail.com"  -- Configures email
+git config list -- lists all the configurations
+git remote set-url orign git@<url -- makes connection to remote git.
 git add . - adds files to staging directory
 git add fileA.txt - Adds fileA.txt to staging area
 git reset fileA.txt - undo the file from staging area
 git status - Give current status of working directory
+git checkout <feature> : switches to feature branch
 git commit -m "<message> - moves the code to Local Git repository
 
 Revert a pushed commit in Git: This should be done for shared repo
@@ -22,8 +25,24 @@ git reset --hard <commitID> or git reset --hard Head~1 --> This will delete the 
 
 git commit -- amend --> if you forgot to add a change in the last commit we can add that change to staging area and then                     give git commit amend this wil include the change to the last commit
 
-git log - gives commit history
-git log -all - gives all commit history
+git log - gives commit history .
+git log -all : gives all commit history
+git log -p : gives commit history and code changes
+git log --oneline : gives commit ids and messages
+git log --since=29-03-2019 --untill=22-04-2020
+
+git push origin <branch> : To Push the code to remote branch or origin
+
+git branch dev : creates a dev branch
+git push origin --delete dev : Deletes remote dev branch
+git branch -d dev: Delete a branch after merge in local
+git branch -D dev: Delete a branch before merge in local
+
+Merge
+-----
+git checkout master - switches to master branch
+git merge feature - merges feature branch to master.
+if we want to merge from feature to master first we need to go to master and then run merge command
 
 Stash
 -----
