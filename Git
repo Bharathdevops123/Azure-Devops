@@ -59,9 +59,8 @@ git clean --> Removes the files that are nt under version control
 git pull : Gets all the commits and code changes to local git repo and Working directory
 git fetch: Gets the commits and code changes to Local git Repo but NOT to the Working directory
 
-
-
 Git File status
 U- Untracked files - new files are there in working directory but they are not added to Git
 M - File is modified
 
+Tools to work with Git: Visual studio Code, Command Prompt, Git bash
