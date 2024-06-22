@@ -7,23 +7,20 @@ git add . - adds files to staging directory
 git add fileA.txt - Adds fileA.txt to staging area
 git reset fileA.txt - undo the file from staging area
 git status - Give current status of working directory
-git commit -m "<message> - moves the code to Git repository
+git commit -m "<message> - moves the code to Local Git repository
 
 Revert a pushed commit in Git: This should be done for shared repo
 -----------------------------------------------------------------
 git revert <commit ID> ---> This command will revert the commit. After the files are reverted you can check in a new commit 
           with the message revert commit". and then you can push the commit git push origin <branch name>                              https://www.youtube.com/watch?v=H2DuJNWbqLw
+git revert Head~1 : This reverts last commit
+git revert Head~4 : This reverts last 4 commits
 
 To Delete a pushed commit in Git: This can be done for personal repo
 ------------------------------------------------------------------------
 git reset --hard <commitID> or git reset --hard Head~1 --> This will delete the commit
 
 git commit -- amend --> if you forgot to add a change in the last commit we can add that change to staging area and then                     give git commit amend this wil include the change to the last commit
-
-Revert a local commit:
-----------------------
-
-git update-ref --> Undo last commit.
 
 git log - gives commit history
 git log -all - gives all commit history
