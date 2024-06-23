@@ -40,11 +40,23 @@ git push origin --delete dev : Deletes remote dev branch
 git branch -d dev: Delete dev branch
 git branch -D dev: Delete dev branch -D means force delete
 
-Merge
------
+Merge branches
+---------------
 git checkout master - switches to master branch
 git merge feature - merges feature branch to master.
 if we want to merge from feature to master first we need to go to master and then run merge command
+
+Merge speicific commits from one branch to other branch
+-------------------------------------------------------
+If you have committed changes to the master branch. Now you want to move that same commit to release-branch. 
+Check the commit id(Eg:xyzabc123) for the commit.
+Now try following the commands
+git checkout release-branch
+git cherry-pick xyzabc123 --  merge commit to release-branch
+git cherry-pick commit1 commit2 commit3 commit4 commit5 -- to merge multiple commits
+git push origin release-branch
+
+
 
 Stash
 -----
@@ -54,7 +66,7 @@ git stash apply "stash@{n}" -->  n =0,1,2... this will get our changes from the 
 git stash pop "stash@{n}" -->  n =0,1,2... this will get our changes from the statsh n but will DELETE the stash
 git stash drop "stash@{n}" --> Deletes the stash n
 
-git clean --> Removes the files that are nt under version control
+git clean --> Removes the files that are not under version control
 
 git pull : Gets all the commits and code changes to local git repo and Working directory
 git fetch: Gets the commits and code changes to Local git Repo but NOT to the Working directory
