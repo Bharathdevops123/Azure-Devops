@@ -21,6 +21,12 @@ git revert <commit ID> ---> This command will revert the commit. After the files
 git revert Head~1 : This reverts last commit
 git revert Head~4 : This reverts last 4 commits
 
+Revert only one file from a changeset:
+--------------------------------------
+git revert <commit id>
+Now in Visual studio code remove the files from the changes section which you dont want to undo.
+add to the staging and commit the changeset and push to origin.
+
 To Delete a pushed commit in Git: This can be done for personal repo
 ------------------------------------------------------------------------
 git reset --hard <commitID> or git reset --hard Head~1 --> This will delete the commit
@@ -55,7 +61,6 @@ git checkout release-branch
 git cherry-pick xyzabc123 --  merge commit to release-branch
 git cherry-pick commit1 commit2 commit3 commit4 commit5 -- to merge multiple commits
 git push origin release-branch
-
 
 
 Stash
