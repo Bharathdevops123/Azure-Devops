@@ -23,6 +23,8 @@ Installation:
 Linux:
 You can install community edition docker container on Linux server and you can use it for the analysys.
 you can see SonarQube Linux install page
+NOTE: Dont install docker container because it uses H2 database on that server and if the scan results increase certain linit then sonarQube will not work
+So better install sonar qube as an application on linux server and give connection to sql database.
 
 Windows:
 Download the sonar qube files and install it.
