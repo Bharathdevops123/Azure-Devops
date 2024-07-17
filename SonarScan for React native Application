@@ -1,0 +1,40 @@
+SonarScan for React native Application
+
+Go to Sonar qube create a project 
+Projectname "Mobile"
+projectkey = "Mobile"
+Create a Global token. Go to Administration on top right corner --> Security--> Create a token with any of the name example MobileToken. 
+SAve the token at your local preserve it safely.
+
+Go to your MReact native Project in ADO.
+Create sonar-project.properties file at the source where you have package.json file and add below content in the sonar-project.properties
+------------------------------------------
+# Must be unique in a given SonarQube instance
+sonar.projectKey=<Project key name you created in SOnarQube Eg Mobile>
+
+# This is the name and version displayed in the SonarQube UI.
+# Was mandatory prior to SonarQube 6.1.
+sonar.projectName=<Project name you created in SOnarQube Eg Mobile>
+sonar.projectVersion=1.0
+ 
+# Path is relative to the sonar-project.properties file.
+# Replace "\" by "/" on Windows.
+# This property is optional if sonar.modules is set. 
+sonar.sources=.
+ 
+# Encoding of the source code. Default is default system encoding
+sonar.sourceEncoding=UTF-8
+----------------------------------------------------
+
+In the ADO Pipeline you can give below task
+  - task: CmdLine@2
+    inputs:
+      script: 'npx sonarqube-scanner -Dsonar.host.url=http://Sonarqubeserver:9000 -Dsonar.login=s<token> -X'
+    displayName: SonarScan
+
+
+
+By this it will prepare scan results in Sonar Que under Mobile project.
+
+
+
