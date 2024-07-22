@@ -55,7 +55,8 @@ Add this token to ADO service connection.
 
 Save token some where you do not loose it
 
-In the ADO Build pipeline. This setup will work for any application like Dotnet, Java , Reactnative
+In the ADO Build pipeline. This setup will work for any application like Dotnet, Java , Reactnative, etc
+-------------------------------------------------------------------------------------------------------
 Add SonarQube tasks from the Market place to the Organization.
 Add below Tasks to the build
 1) Prepare Analysis on SonarQube for .net application
@@ -65,5 +66,46 @@ Add below Tasks to the build
 2) Use Java Installer (Select Preinstalled)
 3) Run Code Analysis 
 4) Publist Quality Gate Results (This will upload results to the pipeline)
+URl: https://docs.sonarsource.com/sonarqube/latest/devops-platform-integration/azure-devops-integration/
+
+Yaml Pipeline Code:
+------------------------
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: '18'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'LocalDirectory'
+      jdkFile: '/Users/tfsbuild/java-bin/java18-home.tar.gz'
+      jdkDestinationDirectory: '/Users/tfsbuild/java-temp/'
+      cleanDestinationDirectory: true
+    displayName: install java
+    enabled: true
 
 
+  - task: JavaToolInstaller@0
+    displayName: 'Use Java 18'
+    inputs:
+      versionSpec: '18'
+      jdkArchitectureOption: x64
+      jdkSourceOption: PreInstalled
+    condition: eq(variables.isMain, true)      
+  
+  - task: SonarQubePrepare@5
+    inputs:
+      SonarQube: '<Service COnnection>'
+      scannerMode: 'CLI'
+      configMode: 'manual'
+      cliProjectKey: '<mobileApp>' This is the Project key name created in SonarQube 
+      cliProjectName: '<mobileApp>' This is the Project key name created in SonarQube
+      cliSources: '.'
+    condition: eq(variables.isMain, true)
+
+  - task: SonarQubeAnalyze@5
+    inputs:
+      jdkversion: 'JAVA_HOME'
+    condition: eq(variables.isMain, true)
+        
+  - task: SonarQubePublish@5
+    inputs:
+      pollingTimeoutSec: '10000000'
+    condition: eq(variables.isMain, true)
