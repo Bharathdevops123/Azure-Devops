@@ -55,7 +55,7 @@ Add this token to ADO service connection.
 
 Save token some where you do not loose it
 
-In the ADO Build pipeline.
+In the ADO Build pipeline. This setup will work for any application like Dotnet, Java , Reactnative
 Add SonarQube tasks from the Market place to the Organization.
 Add below Tasks to the build
 1) Prepare Analysis on SonarQube for .net application
