@@ -21,9 +21,9 @@ SonarQube: It is Code quality and test management tool. It does the following
 
 Always prefer to install LTA/LTS version:
 ------------------------------------------
-LTA refers to the version of SonarQube that is released every 18 months (previously referred to as Long-Term Support or LTS). 
+LTA refers to the version of SonarQube that is released every 18 months (previously referred to as Long-Term Support or LTS).
 It is a version of the product that is functionally complete and will stay active for a longer period of time. 
-Large organizations sometimes prefer to stay on LTA as they are not a
+Large organizations sometimes prefer to stay on LTA as they are not able to upgrade frequently and choose to upgrade every 18 months instead.
 
 Installation:
 Linux:
