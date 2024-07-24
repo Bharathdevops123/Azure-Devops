@@ -19,6 +19,12 @@ SonarQube: It is Code quality and test management tool. It does the following
  * A passing (green) quality gate means the code meets your standard and is ready to be merged.
  * A failing (red) quality gate means there are issues to address.
 
+Always prefer to install LTA/LTS version:
+------------------------------------------
+LTA refers to the version of SonarQube that is released every 18 months (previously referred to as Long-Term Support or LTS). 
+It is a version of the product that is functionally complete and will stay active for a longer period of time. 
+Large organizations sometimes prefer to stay on LTA as they are not a
+
 Installation:
 Linux:
 You can install community edition docker container on Linux server and you can use it for the analysys.
