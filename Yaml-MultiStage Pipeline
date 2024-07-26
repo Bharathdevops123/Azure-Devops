@@ -1,0 +1,127 @@
+resources:
+  repositories:
+    - repository: Repo1 #other repo which is not the current repo. if we have template in Repo1
+      type: git
+      name: Repo1/Repo1
+      ref: main
+
+#Trigger
+trigger:
+  branches:
+    include:
+      - development
+      - main
+  batch: true
+  paths:
+    include:
+      - '*'
+    exclude:
+      - <any Folder>
+
+pool:
+  name: docker
+
+variables:
+  - group: Mobile
+  - name: isDevOrMain
+    value: $[or(eq(variables['Build.SourceBranch'], 'refs/heads/dev'), eq(variables['Build.SourceBranch'], 'refs/heads/main'))]
+  - name: isDev
+    value: $[eq(variables['Build.SourceBranch'], 'refs/heads/dev')]
+  - name: isPR
+    value: $[eq(variables['System.PullRequest.TargetBranch'], 'refs/heads/dev')]
+  - name: isMain
+    value: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+
+
+stages:
+- stage: Dev
+  displayName: 'Build and Deploy to Dev'
+  jobs:
+  - job:
+    workspace:
+      clean: all 
+    steps:
+    - template: templates/App1/template-App1.yml@Repo1
+      parameters:
+        dockerRepo: $(DOCKER_REPOSITORY_NAME)
+        ecrUsername: AWS
+        feed: feedID
+        nugetSrc: "nuget source url"
+        buildConf: $(buildConfiguration)
+        ecrUri: 123.dkr.ecr.us-east-1.amazonaws.com
+        ecrRepo: 123.dkr.ecr.us-east-1.amazonaws.com/App1-repo
+        ecrRegion: us-east-1
+        prevTag: latest-dev
+        prevRepo: app1-repo
+        imageTag: latest-dev
+        prevImageTag: latest-dev-previous
+        runBuild: true
+        sonarServer: 'App1_sonarqube'
+        sonarProjKey: 'App1-integration-scan'
+        sonarProjName: 'App1-integratio-scan'
+        
+
+- stage: QA
+  dependsOn: Dev
+  condition: and(succeeded(), or(eq(variables['isDevOrQA'], 'true'), eq(variables['isProd'], 'true')))
+  displayName: 'Deploy to QA'
+  jobs:
+    - job:
+      workspace:
+          clean: all 
+    - deployment: 'DeployToQA'
+      environment: 'app1-deploy-qa'
+      strategy:
+          runOnce:
+            deploy:
+              steps:
+              - template: templates/app1/template-App1.yml@Repo1
+                parameters:
+                  dockerRepo: $(DOCKER_REPOSITORY_NAME)
+                  ecrUsername: AWS
+                  feed: <Feed ID>
+                  nugetSrc: "nuget url"
+                  buildConf: $(buildConfiguration)
+                  ecrUri: 123.dkr.ecr.us-east-1.amazonaws.com
+                  ecrRegion: us-east-1
+                  prevTag: latest-QA
+                  prevRepo: 123.dkr.ecr.us-east-1.amazonaws.com/app1-repo
+                  ecrRepo: 123.dkr.ecr.us-east-1.amazonaws.com/app1-repo
+                  imageTag: latest-qa
+                  prevImageTag: latest-QA-previous
+                  runBuild: false
+                  sonarServer: 'app1_sonarqube'
+                  sonarProjKey: 'app1-integration-scan'
+                  sonarProjName: 'app1-integratio-scan'
+
+- stage: Prod
+  condition: and(succeeded(), eq(variables['isProd'], 'true'))
+  displayName: 'Build and Deploy to Prod'
+  jobs:
+    - job:
+      workspace:
+          clean: all 
+    - deployment: 'DeployToProd'
+      environment: 'app1-deploy-prod'
+      strategy:
+          runOnce:
+            deploy:
+              steps:
+              - template: templates/app1/template-App1.yml@Repo1
+                parameters:
+                  dockerRepo: $(DOCKER_REPOSITORY_NAME)
+                  ecrUsername: AWS
+                  feed: <Feed ID>
+                  nugetSrc: "nuget url"
+                  buildConf: $(buildConfiguration)
+                  ecrUri: 123.dkr.ecr.us-east-1.amazonaws.com
+                  ecrRegion: us-east-1
+                  prevTag: latest-PROD
+                  prevRepo: 123.dkr.ecr.us-east-1.amazonaws.com/app1-repo
+                  ecrRepo: 123.dkr.ecr.us-east-1.amazonaws.com/app1-repo
+                  imageTag: latest-PROD
+                  prevImageTag: latest-QA-previous
+                  runBuild: false
+                  sonarServer: 'app1_sonarqube'
+                  sonarProjKey: 'app1-integration-scan'
+                  sonarProjName: 'app1-integratio-scan'
