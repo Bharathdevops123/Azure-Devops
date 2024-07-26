@@ -1,0 +1,154 @@
+parameters:
+- name: dockerRepo
+  type: string
+- name: ecrUsername
+  type: string
+- name: feed
+  type: string
+- name: nugetSrc
+  type: string
+- name: buildConf
+  type: string
+- name: ecrUri
+  type: string
+- name: ecrRepo
+  type: string
+- name: ecrRegion
+  type: string
+- name: prevTag
+  type: string
+- name: prevRepo
+  type: string
+- name: imageTag
+  type: string
+- name: prevImageTag
+  type: string
+- name: runBuild
+  type: boolean
+- name: sonarServer
+  type: string
+- name: sonarProjKey
+  type: string
+- name: sonarProjName
+  type: string
+
+
+steps:
+# docker build
+- task: Docker@2
+  displayName: Build an image
+  inputs:
+    repository: ${{ parameters.dockerRepo }}
+    command: 'build'
+    Dockerfile: '**/Dockerfile'
+    arguments: --no-cache --build-arg NUGET_SRC=${{ parameters.nugetSrc }}    
+    tags: ${{ parameters.imageTag }}
+  condition: and(succeeded(), eq(${{ parameters.runBuild }}, true))
+
+- task: JavaToolInstaller@0
+  inputs:
+    versionSpec: '11'
+    jdkArchitectureOption: 'x64'
+    jdkSourceOption: 'PreInstalled'
+  condition: and(succeeded(), eq(${{ parameters.runBuild }}, true))
+
+- task: DotNetCoreCLI@2
+  displayName: 'Run Unit tests'
+  inputs:
+    command: 'test'
+    projects: '**/ABC.App1.Filing.Process.Test*.csproj'
+    arguments: '--configuration ${{ parameters.buildConf }} /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./TestResults/'
+    testRunTitle: 'Run Test'
+  condition: and(succeeded(), eq(${{ parameters.runBuild }}, true))
+
+- task: NuGetToolInstaller@1
+  displayName: Install Nuget 5.5
+  inputs:
+    versionSpec: '5.5.x'
+    checkLatest: true
+  condition: and(succeeded(), eq(${{ parameters.runBuild }}, true))
+
+- task: UseDotNet@2
+  displayName: Use dot net
+  inputs:
+    version: 6.x
+    performMultiLevelLookup: true
+    includePreviewVersions: true # Required for preview versions
+  condition: and(succeeded(), eq(${{ parameters.runBuild }}, true))
+
+- task: NuGetCommand@2
+  displayName: "Restore NuGet"
+  inputs:
+    command: 'restore'
+    restoreSolution: '**/ABC.Net6.Utilities.*.sln'
+    feedsToUse: 'select'
+    vstsFeed: ${{ parameters.feed }}
+  condition: and(succeeded(), eq(${{ parameters.runBuild }}, true))
+
+- task: SonarQubePrepare@5
+  displayName: 'Prepare SonarQube'
+  inputs:
+    SonarQube: ${{ parameters.sonarServer }}
+    scannerMode: 'MSBuild'
+    projectKey: ${{ parameters.sonarProjKey }}
+    projectName: ${{ parameters.sonarProjName }}
+    extraProperties: |
+      sonar.exclusions=**/DB/**, **/Common/**, **/Models/**
+      sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/**/TestResults/coverage.opencover.xml
+  condition: and(succeeded(), eq(${{ parameters.runBuild }}, true), eq(variables['isProd'], 'true'))
+
+- task: PowerShell@2
+  displayName: 'Tag image as previous if already exists'
+  inputs:
+    targetType: 'inline'
+    script: |
+      cd 'C:\Program Files\Amazon\AWSCLIV2'
+
+      docker login --username ${{ parameters.ecrUsername }} -p $(aws ecr get-login-password --region ${{ parameters.ecrRegion }} ) ${{ parameters.ecrUri }}
+      
+      if (docker pull ${{ parameters.ecrRepo }}:${{ parameters.imageTag }}){
+          Write-Host "Image exists, tagging as previous"         
+          docker image tag ${{ parameters.ecrRepo }}:${{ parameters.imageTag }} ${{ parameters.ecrRepo }}:${{ parameters.prevImageTag }}
+          docker push ${{ parameters.ecrRepo }}:${{ parameters.prevImageTag }}
+          }
+      else{
+          Write-Host "Image does not exist"
+          }
+  condition: and(succeeded(), eq(${{ parameters.runBuild }}, true))
+
+# dotnet command build, pointing to our csproj file
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
+  inputs:
+    command: 'build'
+    arguments: '--configuration ${{ parameters.buildConf }}'
+    projects: '**/ABC.App1.Filing.*.csproj'
+  condition: and(succeeded(), eq(${{ parameters.runBuild }}, true))
+
+- task: SonarQubeAnalyze@5
+  displayName: 'Run Code Analysis'
+  inputs:
+    jdkversion: 'JAVA_HOME_11_X64'
+  condition: and(succeeded(), eq(${{ parameters.runBuild }}, true), eq(variables['isProd'], 'true'))
+    
+- task: SonarQubePublish@5
+  displayName: 'Publish Quality Gate Results' 
+  inputs:
+    pollingTimeoutSec: '300'
+  condition: and(succeeded(), eq(${{ parameters.runBuild }}, true), eq(variables['isProd'], 'true'))
+
+- task: CmdLine@2
+  displayName: 'Create {{ parameters.imageTag }} image and ECR Push'
+  inputs:
+    script: |
+
+      docker tag ${{ parameters.prevRepo }}:${{ parameters.prevTag }} ${{ parameters.ecrRepo }}:${{ parameters.imageTag }}
+      
+      docker push ${{ parameters.ecrRepo }}:${{ parameters.imageTag }}
+
+- task: CmdLine@2
+  displayName: 'Clean docker images'
+  inputs:
+    script: |
+      docker image prune -f
+  condition: and(succeeded(), eq(${{ parameters.runBuild }}, true))
