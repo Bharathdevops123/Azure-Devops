@@ -1,0 +1,13 @@
+How to Create a PR Build.
+
+1) We need to create a separate pipeline for the build pipeline with build.yml and name the pipeline as "PR Pipeline". I has to contain only build part.
+
+2) Now we have to set Pull request policies to trigger a pipeline when a PR is raised
+Go to Project settings -->Repository --> Select the Repo and click on Policies --> Click on Dev branch --Go to Build Validation
+
+Fill out the Build form
+Select the PR Pipeline under Build name 
+Trigger : Automatic
+Policy Requirement: Require (Build must succeed in order to complete the pull request)
+Build Expiration : Immediate
+Policy Name: <Give your own Policy name example : PR Policy"
