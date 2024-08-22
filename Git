@@ -16,16 +16,25 @@ git commit -m "<message> - moves the code to Local Git repository
 
 Revert a pushed commit in Git: This should be done for shared repo
 -----------------------------------------------------------------
-git revert <commit ID> ---> This command will revert the commit. After the files are reverted you can check in a new commit 
+Create a new branch.
+run below command. you can see the files in the staged area. give the commit message and commit the changes.
+Push the branch to the Repo and create a pull request to merge the changes to the main branch.
+
+git revert <commit ID> -m 1 ---> This command will revert the commit. After the files are reverted you can check in a new commit 
           with the message revert commit". and then you can push the commit git push origin <branch name>. Same like TFVC                           https://www.youtube.com/watch?v=H2DuJNWbqLw
+
 git revert Head~1 : This reverts last commit
 git revert Head~4 : This reverts last 4 commits
 
 Revert only one file from a changeset:
 --------------------------------------
-git revert <commit id>
-Now in Visual studio code remove the files from the changes section which you dont want to undo.
-add to the staging and commit the changeset and push to origin.
+git revert <commit id> -m 1      : Here 1 means the main line parent 
+Create a new branch
+Now in Visual studio remove the files from the staged area section which you dont want to revert.
+Undo unwanted files from changes section.
+in the Staged area have only files that you want to revert changes. Give Commit message. --> commit the code--> push the branch
+Create a pull request from this branh to the main branch.
+
 
 To Delete a pushed commit in Git: This can be done for personal repo
 ------------------------------------------------------------------------
