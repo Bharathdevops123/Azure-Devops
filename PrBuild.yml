@@ -1,0 +1,46 @@
+
+PRBuild.yml
+-------------
+trigger:
+- none
+ 
+#In this project we have used PR build as per branch wise because code is being developed in multiple branches
+#while merging the code we will get merge conflicts. using these PR's we can fix those conflicts.
+#In other projects code will be developed in one branch and is merged to other branches in that we can have only one PR build.
+
+variables:
+- name: ismajor
+  value: $[eq(variables['System.PullRequest.TargetBranch'], 'refs/heads/major')]
+- name: isminor
+  value: $[eq(variables['System.PullRequest.TargetBranch'], 'refs/heads/minor')]
+- name: ispre-prod
+  value: $[eq(variables['System.PullRequest.TargetBranch'], 'refs/heads/pre-prod')]
+- name: ismain
+  value: $[eq(variables['System.PullRequest.TargetBranch'], 'refs/heads/main')]
+
+jobs:
+- job: 
+  displayName: PR_Build_Major_Branch
+  condition: and(succeeded(), eq(variables['ismajor'], 'true'))
+  timeoutInMinutes: 120
+  pool: AgentPoolNameS2-PR
+  workspace:
+    clean: all 
+  steps:
+  - template: PRBuild-template.yml
+    parameters:
+      BuildConfiguration : "QA"
+      BuildPlatform : "any cpu"
+
+- job: 
+  displayName: PR_Build_Minor_Branch
+  condition: and(succeeded(), eq(variables['isminor'], 'true'))
+  timeoutInMinutes: 120
+  pool: AgentPoolNameS1-PR
+  workspace:
+    clean: all 
+  steps:
+  - template: PRBuild-template.yml
+    parameters:
+      BuildConfiguration : "QA2"
+      BuildPlatform : "any cpu"
