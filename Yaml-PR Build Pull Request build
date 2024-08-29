@@ -15,8 +15,8 @@ Build Expiration : Immediate
 Policy Name: <Give your own Policy name example : PR Policy"
 ________________________________________________________________________________________________________
 
-PRBuild.yml
--------------
+PRBuild.yml - For dotnet and Angular Project
+-------------------------------------------------
 trigger:
 - none
  
