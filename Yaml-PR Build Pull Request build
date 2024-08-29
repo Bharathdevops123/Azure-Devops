@@ -1,6 +1,8 @@
 How to Create a PR Build.
 
-1) We need to create a separate pipeline for the build pipeline with build.yml and name the pipeline as "PR Pipeline". I has to contain only build part.
+1) We need to create a separate pipeline for the build pipeline with PRbuild.yml and PRBuild-template.yml name the pipeline as "PR Pipeline". 
+It has to contain only build part.
+Both files are given below
 
 2) Now we have to set Pull request policies to trigger a pipeline when a PR is raised
 Go to Project settings -->Repository --> Select the Repo and click on Policies --> Click on Dev branch --Go to Build Validation
@@ -11,3 +13,172 @@ Trigger : Automatic
 Policy Requirement: Require (Build must succeed in order to complete the pull request)
 Build Expiration : Immediate
 Policy Name: <Give your own Policy name example : PR Policy"
+________________________________________________________________________________________________________
+
+PRBuild.yml
+-------------
+trigger:
+- none
+ 
+variables:
+- name: ismajor
+  value: $[eq(variables['System.PullRequest.TargetBranch'], 'refs/heads/major')]
+- name: isminor
+  value: $[eq(variables['System.PullRequest.TargetBranch'], 'refs/heads/minor')]
+- name: ispre-prod
+  value: $[eq(variables['System.PullRequest.TargetBranch'], 'refs/heads/pre-prod')]
+- name: ismain
+  value: $[eq(variables['System.PullRequest.TargetBranch'], 'refs/heads/main')]
+
+jobs:
+- job: 
+  displayName: PR_Build_Major_Branch
+  condition: and(succeeded(), eq(variables['ismajor'], 'true'))
+  timeoutInMinutes: 120
+  pool: AgentPoolNameS2-PR
+  workspace:
+    clean: all 
+  steps:
+  - template: PRBuild-template.yml
+    parameters:
+      BuildConfiguration : "QA"
+      BuildPlatform : "any cpu"
+
+- job: 
+  displayName: PR_Build_Minor_Branch
+  condition: and(succeeded(), eq(variables['isminor'], 'true'))
+  timeoutInMinutes: 120
+  pool: AgentPoolNameS1-PR
+  workspace:
+    clean: all 
+  steps:
+  - template: PRBuild-template.yml
+    parameters:
+      BuildConfiguration : "QA2"
+      BuildPlatform : "any cpu"
+
+
+
+____________________________________________________________________________________________________________________
+
+
+PRBuild-template.yml code is below
+-------------------------------
+parameters:
+- name: BuildConfiguration
+  type: string
+- name: BuildPlatform
+  type: string
+
+steps: 
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet restore'
+  inputs:
+    command: restore
+    projects: '**/*.csproj'
+  condition: and(succeeded(), eq(variables['Rundotnetrestore'], 'Y'))
+
+- task: NuGetToolInstaller@1
+  displayName: 'Use NuGet 5.11.0'
+  inputs:
+    versionSpec: 5.11.0
+    checkLatest: true
+
+- task: NuGetCommand@2
+  displayName: 'NuGet restore $/App1/App1.sln'
+  inputs:
+    restoreSolution: 'App1/App1.sln'
+
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet publish'
+  inputs:
+    command: publish
+    publishWebProjects: false
+    projects: |
+     App1\Utility\Utility\Utility.csproj
+     App1\BLL\ConnectionManager\ConnectionManager.csproj
+     App1\BLL\Client\Client.csproj
+     App1\BLL\User\User.csproj
+     App1\BLL\User\User.csproj
+    arguments: '-f netstandard2.0'
+    zipAfterPublish: false
+    modifyOutputPath: false
+
+
+- task: MSBuild@1
+  displayName: 'Build solution App1.sln'
+  inputs:
+    solution: 'App1/App1.sln'
+    msbuildLocationMethod: 'location'
+    msbuildLocation: 'C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe'
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: ${{ parameters.BuildConfiguration }}
+    msbuildArguments: '/p:DeployOnBuild=true /p:IncrementalBuild=true /p:PackageAsSingleFile=False'
+    clean: true
+    maximumCpuCount: true
+
+
+- powershell: |
+   $files=$(git diff HEAD HEAD~ --name-only)
+    $temp=$files -split '`r`na'
+    $count=$temp.Length
+    echo "Total changed $count files"
+    $a = 0
+    For ($i=0; $i -lt $temp.Length; $i++)
+    {
+      $name=$temp[$i]
+      echo "this is $name file"
+      if ($name -like "App1/Website/angular*")
+        {
+    $a++
+    Write-Host "No of Angular files Changed = $a "
+        }
+    }
+    
+      if ($a -gt 0)
+        {
+    Write-Host "##vso[task.setvariable variable=RunAngular;]Y"
+    Write-Host "Angular Task Will execute "
+        }
+      else
+        {
+        Write-Host "##vso[task.setvariable variable=RunAngular;]N"
+        Write-Host "Angular Files NOT changed "
+        Write-Host "Angular Task will NOT execute "
+        }
+     
+  errorActionPreference: continue
+  displayName: 'Check Website/angular for changes - Git'
+  continueOnError: true
+
+
+- task: Npm@0
+  displayName: 'npm run'
+  inputs:
+    cwd: 'App1/Website/angular'
+    command: run
+    arguments: release
+  condition: and(succeeded(), eq(variables['RunAngular'], 'Y'), eq(variables['RunNpm'], 'Y'))
+
+
+- script: |
+   npm config rm https-proxy
+   npm config rm proxy
+  displayName: 'remove proxy '
+  condition: and(succeeded(), eq(variables['AngularProxySet'], 'Y'))
+
+
+- task: VSTest@2
+  displayName: 'Test Assemblies **\website\bin\*.Tests.dll'
+  inputs:
+    testAssemblyVer2: '*.Tests.dll'
+    searchFolder: '$(System.DefaultWorkingDirectory)\website\bin'
+    vstestLocationMethod: location
+    vstestLocation: 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe'
+    pathtoCustomTestAdapters: '$(Build.SourcesDirectory)\website\bin'
+    runInParallel: true
+    platform: ${{ parameters.BuildPlatform }}
+    configuration: ${{ parameters.BuildConfiguration }}
+
+
