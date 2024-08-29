@@ -20,6 +20,10 @@ PRBuild.yml
 trigger:
 - none
  
+#In this project we have used PR build as per branch wise because code is being developed in multiple branches
+#while merging the code we will get merge conflicts. using these PR's we can fix those conflicts.
+#In other projects code will be developed in one branch and is merged to other branches in that we can have only one PR build.
+
 variables:
 - name: ismajor
   value: $[eq(variables['System.PullRequest.TargetBranch'], 'refs/heads/major')]
