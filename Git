@@ -61,15 +61,17 @@ git checkout master - switches to master branch
 git merge feature - merges feature branch to master.
 if we want to merge from feature to master first we need to go to master and then run merge command
 
-Merge speicific commits from one branch to other branch
--------------------------------------------------------
+Cherry pick from command prompt - Merge specific commits from one branch to other branch
+----------------------------------------------------------------------------------------
 If you have committed changes to the master branch. Now you want to move that same commit to release-branch. 
-Check the commit id(Eg:xyzabc123) for the commit.
+Check the commit id(Eg:xyzabc123) for the commit you want to pick
 Now try following the commands
-git checkout release-branch
+Create a branch with the name CP-branch
+git checkout CP-branch
 git cherry-pick xyzabc123 --  merge commit to release-branch
 git cherry-pick commit1 commit2 commit3 commit4 commit5 -- to merge multiple commits
-git push origin release-branch
+git push origin CP-branch - Push this branch to Azure Repo
+Create a PR to merge from CP-branch to release-branch
 
 
 Stash
