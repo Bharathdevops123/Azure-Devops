@@ -55,15 +55,23 @@ git push origin --delete dev : Deletes remote dev branch
 git branch -d dev: Delete dev branch
 git branch -D dev: Delete dev branch -D means force delete
 
-Merge branches
----------------
+Merge branches in local
+-----------------------
 git checkout master - switches to master branch
 git merge feature - merges feature branch to master.
 if we want to merge from feature to master first we need to go to master and then run merge command
 
+Merge branches in Visual studio and Azure devops
+------------------------------------------------
+merge from master to feature
+Create a new branch with name name merge-from-mastertofeature from master branch
+and push merge-from-mastertofeature branch to ADO
+create a pul request to merge merge-from-mastertofeature to feature and complete the merge.
+After the merge delete merge-from-mastertofeature
+
 Cherry pick from command prompt - Merge specific commits from one branch to other branch
 ----------------------------------------------------------------------------------------
-If you have committed changes to the master branch. Now you want to move that same commit to release-branch. 
+If you have committed changes to the master branch. Now you want to pick that same commit to release-branch. 
 Check the commit id(Eg:xyzabc123) for the commit you want to pick
 Now try following the commands
 Create a branch with the name CP-branch
@@ -73,6 +81,12 @@ git cherry-pick commit1 commit2 commit3 commit4 commit5 -- to merge multiple com
 git push origin CP-branch - Push this branch to Azure Repo
 Create a PR to merge from CP-branch to release-branch
 
+Cherry pick from Visual studio and ADO - Merge specific commits from one branch to other branch
+----------------------------------------------------------------------------------------
+Go to the PR and click on cherry pick. it will ask you to create a new branch. create it as CP-branch or use default name it provides
+If there are merge conflicts it will throw error you need to do it from Visual studio at that time.
+create a PR to merge from CP-branch to release-branch
+after merge delete CP-branch
 
 Stash
 -----
