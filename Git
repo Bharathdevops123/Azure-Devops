@@ -105,4 +105,4 @@ Git File status
 U- Untracked files - new files are there in working directory but they are not added to Git
 M - File is modified
 
-Tools to work with Git: Visual studio Code, Command Prompt, Git bash
+Tools to work with Git: Visual studio, Command Prompt, Git bash, Visual studio Code,
