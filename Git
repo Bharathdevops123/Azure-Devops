@@ -26,7 +26,7 @@ git revert <commit ID> -m 1 ---> This command will revert the commit. After the 
 git revert Head~1 : This reverts last commit
 git revert Head~4 : This reverts last 4 commits
 
-Revert only one file from a changeset:
+Revert only one file from a commit:
 --------------------------------------
 git revert <commit id> -m 1      : Here 1 means the main line parent 
 Create a new branch
