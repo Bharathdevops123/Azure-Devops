@@ -64,7 +64,7 @@ if we want to merge from feature to master first we need to go to master and the
 Merge branches in Visual studio and Azure devops
 ------------------------------------------------
 merge from master to feature
-Create a new branch with name name merge-from-mastertofeature from master branch
+Create a new branch with name merge-from-mastertofeature from master branch
 and push merge-from-mastertofeature branch to ADO
 create a pul request to merge merge-from-mastertofeature to feature and complete the merge.
 After the merge delete merge-from-mastertofeature
