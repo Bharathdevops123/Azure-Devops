@@ -73,7 +73,7 @@ Add below Tasks to the build
    analysis after the MS build and VStests task)
 2) Use Java Installer (Select Preinstalled)
 3) Run Code Analysis 
-4) Publist Quality Gate Results (This will upload results to the pipeline)
+4) Publish Quality Gate Results (This will upload results to the pipeline)
 
 URl: https://docs.sonarsource.com/sonarqube/latest/devops-platform-integration/azure-devops-integration/
 
