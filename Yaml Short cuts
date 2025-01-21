@@ -1,2 +1,4 @@
 Yaml Short cuts
 Ctrl+Space for Intellisense support 
+Ctrl + /     Comment multiple lines
+Ctrl + /     UnComment Commented multiple lines
