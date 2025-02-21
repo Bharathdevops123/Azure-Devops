@@ -1,0 +1,113 @@
+#Checkmergeconflicts-ApprovePR through APi in Azure Devops
+# Configuration - Update with your Azure DevOps organization, project, and repository details
+$organization = "Mswiftdev"  # Replace with your Azure DevOps organization name
+$project = "Mswift .NET"            # Replace with your Azure DevOps project name
+$repository = "Mswift-core"      # Replace with your repository name
+$prId = "$(pullRequestId)"                        # Replace with your PR ID
+$personalAccessToken = "oebwosvgor7ez5mcr4v2woxoxdrjxxb6rzoua"  # Replace with your Azure DevOps PAT. This PAT created using Mfsbuild ID and the PAT name : AutoApprovePullRequest.
+$EmailList = $(pr-EmailList) #Multiple Emailid are comma separated Eg: 'MedojuB2@Mswift.com','Sali@Mswift.com'
+$SourceBranch = $(pr-SourceBranch)
+$TargetBranch = $(pr-TargetBranch)
+
+#Send Email Function
+function SendEmail($Message, $body)
+{
+#$EmailList = 'MedojuB2@Mswift.com'
+
+$secpasswd = ConvertTo-SecureString "BPAElzLCY6yLeD2kb8pB81234xx9VKHJzK+Zxkwdi" -AsPlainText -Force
+$cred = New-Object System.Management.Automation.PSCredential ("AKIA5L31234F7YA5AB", $secpasswd)
+
+#Send email
+Import-Module Microsoft.PowerShell.Utility
+Send-MailMessage -From 'tfs@Mswift.com' -To $EmailList -Subject $Message -Body "Hi,
+
+$body.
+
+Thanks,
+AzureDevOps" -DeliveryNotificationOption OnSuccess, OnFailure -SmtpServer 'email-smtp.us-east-1.amazonaws.com' -Port 587 -Credential $cred -UseSsl
+}
+
+
+#Creating BuildUrl We can use this to send in email
+$Buildurl = '$(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)'
+
+
+# Headers with the PAT for authentication
+$headers = @{
+    "Content-Type" = "application/json"
+    "Authorization" = "Basic " + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$personalAccessToken"))
+}
+
+
+$apiVersion = "?api-version=7.1-preview"
+
+# Base64 encode the PAT token for authentication
+$base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$($personalAccessToken)"))
+
+if ($prId)
+{
+
+
+# Define the REST API URL to check for merge conflicts
+$uri = "https://ado.Mswift.com:8080/tfs/$organization/$project/_apis/git/repositories/$repository/pullrequests/$prId$apiVersion"
+echo $uri
+
+# Make the GET request to get PR details
+$response = Invoke-RestMethod -Uri $uri -Method Get -Headers $headers -ContentType "application/json"
+echo $response
+
+# Check if there are merge conflicts
+if ($response.mergeStatus -eq "Conflicts") {
+    Write-Host "The pull request $prId has merge conflicts and cannot be approved."
+    
+        
+$message1 = "NOT Approved: PR: $prId has merge conflicts"
+$body1 = "The pull request $prId has merge conflicts and cannot be approved. Please Resolve MERGE Conflicts and COMMENTS.
+        `nBuild Pipeline Name: $(Build.DefinitionName) 
+        `nBuild Url: https://ado.Mswift.com:8080/tfs/Mswiftdev/Mswift%20.NET/_build/results?buildId=$(Build.BuildId)&view=results 
+        `nPullRequest Url https://ado.Mswift.com:8080/tfs/Mswiftdev/Mswift%20.NET/_git/Mswift-core/pullrequest/$prId"
+SendEmail $message1 $body1
+
+} else {
+
+Write-Host "The pull request $prId has NO merge conflicts and can be approved."
+
+
+
+
+    # Approve the PR if there are no merge conflicts
+
+    #$approvalUri = "https://ado.Mswift.com:8080/tfs/Mswiftdev/Mswift .NET/_apis/git/repositories/Mswift-core/pullrequests/$prId/reviewers/{reviewerId}?api-version=7.2-preview.1"
+    $approvalUri = "https://ado.Mswift.com:8080/tfs/Mswiftdev/Mswift .NET/_apis/git/repositories/Mswift-core/pullrequests/$prId/reviewers/27130f33-fa25-4231-a9c5-15d04ab4463a?api-version=7.2-preview.1"
+    echo $approvalUri
+    # Create the approval request body (can include reviewer identity or other details)
+    $approvalBody = @{
+  #      reviewer = @{
+   #         id = "27130f33-fa25-4231-a9c5-15d04ab4463a"  # Replace with the Azure DevOps user ID of the reviewer
+     #   }
+        vote = 10 # 10 means approve
+    } | ConvertTo-Json -Depth 3
+
+    # Make the POST request to approve the PR
+    $approvalResponse = Invoke-RestMethod -Uri $approvalUri -Method PUT -Headers $headers -Body $approvalBody -ContentType "application/json"
+    
+    Write-Host "Pull Request #$prId has been approved."
+    #Send Email
+$message2 = "Approved : PR : $prId-NO merge conflicts"
+$body2 = "The pull request $prId has NO merge conflicts and is approved by Mfsbuild.
+        `nBuild Pipeline Name: $(Build.DefinitionName) 
+        `nBuild Url: https://ado.Mswift.com:8080/tfs/Mswiftdev/Mswift%20.NET/_build/results?buildId=$(Build.BuildId)&view=results 
+        `nPullRequest Url https://ado.Mswift.com:8080/tfs/Mswiftdev/Mswift%20.NET/_git/Mswift-core/pullrequest/$prId"
+SendEmail $message2 $body2
+}
+}
+else
+{
+Write-Host "Pull RequestID  $prId is not created "
+$message3 = "No changes to Merge - $SourceBranch to $TargetBranch"
+$body3 = "No Changes to merge from $SourceBranch to $TargetBranch 
+        `nPR: $prId is NOT created.         
+        `nBuild Pipeline Name: $(Build.DefinitionName) 
+        `nBuild Url: https://ado.Mswift.com:8080/tfs/Mswiftdev/Mswift%20.NET/_build/results?buildId=$(Build.BuildId)&view=results"
+SendEmail $message3 $body3
+}
