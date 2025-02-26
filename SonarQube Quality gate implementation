@@ -1,0 +1,44 @@
+SonarQube Quality gate implementation
+-------------------------------------
+1) First we need to implement Code coverage for SonarQube then only we can able to implement Quality gate condition on Code coverage
+
+2) Go to SonarQube --> Click on Quality Gates --Create a Quality gate with the name <AswiftProject-QualityGate>
+
+3) Define your Quality gate conditions
+
+Example:
+a) Issues is lesser than 0
+
+b) Security Hotspots Reviewed is less than 100%
+
+C) Coverage is less than 80.0%
+
+d) Duplicated Lines (%) is greater than 3.0%
+
+We need to add this condition in the SonarPrepare task in the build 
+        sonar.qualitygate.wait=true 
+
+
+Example:
+
+ - task: sonarsource.sonarqube.15B84CA1-B62F-4A2A-A403-89B77A063157.SonarQubePrepare@5
+    displayName: 'Prepare analysis on SonarQube'
+    inputs:
+      SonarQube: 'AswiftCore-Sonar-Free-Edition'
+      #scannerMode: 'dotnet'
+      #dotnetScannerVersion: '*'
+      projectKey: 'Aswift-Core'
+      projectName: 'Aswift-Core'
+      extraProperties: |
+       # Additional properties that will be passed to the scanner, 
+       # Put one key=value per line, example:
+       # sonar.exclusions=**/*.bin, */SyedTest,*/Database DLM,*/Database
+        sonar.cs.vscoveragexml.reportsPaths=$(Build.SourcesDirectory)/TestResults/coverage.xml
+        sonar.qualitygate.wait=true 
+    condition: and(succeeded(), eq(variables['RunSonarQube'], 'Y'), eq(variables['IsQA'], 'true'))
+
+
+At Last we need to add the Project to the Quality Gate:
+---------------------------------------------------------
+
+Go to Quality Gates in SonarQube and add the Project name AswiftProject that is in SonarQube into AswiftProject-QualityGate
