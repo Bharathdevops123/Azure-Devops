@@ -1,0 +1,165 @@
+SonarQube-Code Coverage Implementation
+--------------------------------------
+To implement SonarQubbe code coverage 
+1)we need to have unit test cases in the project. 
+2)We need to generate a coverage.xml file
+To generate coverage.xml we need to see unit test are in which language and need to use that tool to generate coverage.xml
+
+3) this needs to be passed to SonarQube.
+By this the Code coverage will be displayed in the SonarQube
+
+Example:
+We can refer to this site for sonar coverage tools.
+#https://docs.sonarsource.com/sonarqube-server/9.8/analyzing-source-code/test-coverage/dotnet-test-coverage/
+
+If we are want to generate code coverage for dotnet application then we need to use below.
+
+Step1: Generate coverage.xml file
+---------------------------------
+# Check whether TestResults Directory exist. Delete previous coverage reports. If TestResults directory not found creating new.
+$path = "$(Build.SourcesDirectory)\TestResults"
+
+# Check if the directory exists
+if (Test-Path $path) {
+    # Get all .xml files in the directory
+    $xmlFiles = Get-ChildItem -Path $path -Filter *.xml
+    
+    # Check if any .xml files exist
+    if ($xmlFiles) {
+        # Delete each .xml file
+        foreach ($file in $xmlFiles) {
+            Remove-Item $file.FullName -Force
+            Write-Host "Deleted: $($file.FullName)"
+        }
+    } else {
+        Write-Host "No .xml files found in the directory."
+    }
+} else {
+    Write-Host "The specified path does not exist."
+    New-Item -Path "$(Build.SourcesDirectory)\TestResults" -ItemType Directory -Force
+
+}
+
+# We are using dotnet-coverage tool to run unit tests and generate coverage.xml file.
+
+# Search for all '*Tests.csproj' files recursively and store in an array
+$testProjects = Get-ChildItem -Path "$(Build.SourcesDirectory)\" -Recurse -Filter "*Tests.csproj"
+
+# Display each project one by one
+foreach ($project in $testProjects) {
+    Write-Output $project.FullName
+    #sleep 1
+    #$a = 1
+    dotnet-coverage collect dotnet test $project.FullName -f xml  -o $(Build.SourcesDirectory)\TestResults\$project-coverage.xml
+}
+
+cd "$(Build.SourcesDirectory)\TestResults\"
+dotnet-coverage merge *.xml --recursive --output $(Build.SourcesDirectory)\TestResults\coverage.xml --output-format xml
+
+
+Step2: Define Coverage.xml file in the SonarQubePrepare Task:
+---------------------------------------------------------------
+
+ - task: sonarsource.sonarqube.15B84CA1-B62F-4A2A-A403-89B77A063157.SonarQubePrepare@5
+    displayName: 'Prepare analysis on SonarQube'
+    inputs:
+      SonarQube: 'AswiftCore-Sonar-Free-Edition'
+      #scannerMode: 'dotnet'
+      #dotnetScannerVersion: '*'
+      projectKey: 'Aswift-Core'
+      projectName: 'Aswift-Core'
+      extraProperties: |
+       # Additional properties that will be passed to the scanner, 
+       # Put one key=value per line, example:
+       # sonar.exclusions=**/*.bin, */SyedTest,*/Database DLM,*/Database
+        sonar.cs.vscoveragexml.reportsPaths=$(Build.SourcesDirectory)/TestResults/coverage.xml
+        sonar.qualitygate.wait=true 
+    condition: and(succeeded(), eq(variables['RunSonarQube'], 'Y'), eq(variables['IsQA'], 'true'))
+
+
+Example 2: For python application:
+-------------------------------------
+If an application is using other language then we need to use that language specific tool to generate coverage.
+Example; If we are having python application then we can use pytest to generate code coverage.
+
+
+parameters:
+  - name: sonarServer
+    type: string
+
+steps:
+- task: NodeTool@0
+  displayName: Use Node Version
+  inputs:
+    versionSpec: $(NodeVersion)
+    checkLatest: true
+
+
+- task: JavaToolInstaller@0
+  displayName: 'Use Java 17'
+  inputs:
+    versionSpec: 17
+    jdkArchitectureOption: x64
+    jdkSourceOption: PreInstalled
+
+- task: PowerShell@2
+  displayName: Generate Coverage Python
+  inputs:
+    targetType: 'inline'
+    script: |
+      python -m venv env
+      ./env/Scripts/activate
+      pip install pytest
+      pip install pytest-cov
+      pip install urllib3
+      pip install boto3
+      pytest --cov=$(Build.SourcesDirectory) --cov-report=xml:PyCoverage/coverage.xml
+      deactivate
+  continueOnError: true
+  enabled: true
+
+- task: PowerShell@2
+  displayName: Generate Coverage JavaScript
+  inputs:
+    targetType: 'inline'
+    script: |
+      npm  install jest
+      npx jest --coverage --coverageReporters=lcov
+  continueOnError: true
+  enabled: true
+
+- task: PowerShell@2
+  displayName: Remove env
+  inputs:
+    targetType: 'inline'
+    script: |
+      Remove-Item -Path $(Build.SourcesDirectory)/env -Recurse
+  continueOnError: true
+  enabled: true
+
+- task: SonarQubePrepare@7
+  inputs:
+    SonarQube: ${{ parameters.sonarServer }}
+    scannerMode: 'CLI'
+    configMode: 'manual'
+    cliProjectKey: '$(sonarKey)'
+    cliProjectName: '$(sonarProject)'
+    cliSources: '.'
+    extraProperties: |
+        sonar.python.coverage.reportPaths=PyCoverage/coverage.xml
+        sonar.javascript.lcov.reportPaths=coverage/lcov.info
+        sonar.qualitygate.wait=true
+
+- task: SonarQubeAnalyze@7
+  displayName: 'Run Code Analysis'
+  condition: always()
+  inputs:
+    jdkversion: 'JAVA_HOME_17_X64'
+
+  
+- task: SonarQubePublish@7
+  displayName: 'Publish Quality Gate Results'
+  condition: always()
+  inputs:
+    pollingTimeoutSec: '10000000'
+  continueOnError: true
