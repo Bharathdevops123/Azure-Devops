@@ -3,6 +3,7 @@ SonarQube-Code Coverage Implementation
 To implement SonarQubbe code coverage 
 1)we need to have unit test cases in the project. 
 2)We need to generate a coverage.xml file
+3) Make sure to run sonar Coverage and unit testing after the build of application
 To generate coverage.xml we need to see unit test are in which language and need to use that tool to generate coverage.xml
 
 3) this needs to be passed to SonarQube.
@@ -76,9 +77,77 @@ Step2: Define Coverage.xml file in the SonarQubePrepare Task:
         sonar.qualitygate.wait=true 
     condition: and(succeeded(), eq(variables['RunSonarQube'], 'Y'), eq(variables['IsQA'], 'true'))
 
+Example2: If we are using only angualar application
+----------------------------------------------------
+parameters:
+- name: sonarServer
+  type: string
+- name: sonarCliProjectName
+  type: string
+- name: sonarCliProjectKey
+  type: string
+- name: sonarCliSources
+  type: string
+- name: continueOnError
+  type: boolean
+  default: true
+steps:
+  - task: NodeTool@0
+    inputs: 
+      versionSpec: '20.x'
+    displayName: 'Install Node.js'
 
-Example 2: For python application:
--------------------------------------
+  - task: JavaToolInstaller@0
+    displayName: 'Use Java 17'
+    inputs:
+      versionSpec: 17
+      jdkArchitectureOption: x64
+      jdkSourceOption: 'LocalDirectory'
+      jdkFile: 'D:\Java\Java17.zip'
+      jdkDestinationDirectory: 'D:\Java\JavaDest\'
+      cleanDestinationDirectory: true
+    condition: and(succeeded(), eq(variables['Windows-Agent-server'], 'True'))
+
+  - task: PowerShell@2
+    displayName: Generate Coverage JavaScript
+    inputs:
+      targetType: 'inline'
+      script: |
+        npm install
+        npm install jest
+        npx jest --coverage --coverageReporters=lcov
+    continueOnError: true
+    enabled: true
+
+  - task: SonarQubePrepare@5
+    displayName: 'SonarQube'
+    continueOnError: ${{ parameters.continueOnError }}
+    inputs:
+      SonarQube: ${{ parameters.sonarServer }}
+      scannerMode: 'CLI'
+      cliProjectKey: ${{ parameters.sonarCliProjectKey }}
+      cliProjectName: ${{ parameters.sonarCliProjectName }}
+      configMode: 'manual'
+      cliSources: ${{ parameters.sonarCliSources }}
+      extraProperties: |
+        sonar.sources=${{ parameters.sonarCliSources }}
+        sonar.qualitygate.wait=true
+        sonar.javascript.lcov.reportPaths=coverage/lcov.info
+        sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/TestResults/coverage.cobertura.xml
+
+  - task: SonarQubeAnalyze@5
+    continueOnError: ${{ parameters.continueOnError }}
+    inputs:
+      jdkversion: 'JAVA_HOME' # 'JAVA_HOME_11_X64' | 'JAVA_HOME_11_X64' | 'JAVA_HOME_17_X64'. Required. JDK version source for analysis. Default: JAVA_HOME_11_X64.
+
+  - task: SonarQubePublish@5
+    continueOnError: ${{ parameters.continueOnError }}
+    inputs:
+      pollingTimeoutSec: '300' # string. Required. Timeout (s). Default: 300.
+
+
+Example 3: For python application and Angular application if we have 2 languages in an aplication:
+---------------------------------------------------------------------------------------------------
 If an application is using other language then we need to use that language specific tool to generate coverage.
 Example; If we are having python application then we can use pytest to generate code coverage.
 
