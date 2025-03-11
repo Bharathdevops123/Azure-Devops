@@ -1,0 +1,10 @@
+#the below task is available in ADO. This task will raise a pull request and return $(pullRequestId) we can use that $(pullRequestId) in other tasks in the same pipeline.
+- task: ShaykiAbramczyk.CreatePullRequest.CreatePullRequest.CreatePullRequest@1
+  displayName: 'Create Pull Request - ${{ parameters.SourceBranch }} to ${{ parameters.TargetBranch }}'
+  inputs:
+    sourceBranch: ${{ parameters.SourceBranch }}
+    targetBranch: ${{ parameters.TargetBranch }}
+    title: 'Merge ${{ parameters.SourceBranch }} to ${{ parameters.TargetBranch }}'
+    passPullRequestIdBackToADO: true
+    autoComplete: true
+    mergeStrategy: noFastForward
