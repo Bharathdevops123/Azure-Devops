@@ -1,0 +1,10 @@
+Search Files- Pattern matching - search for files or in directories
+
+Symbol	Meaning
+?	a single character
+*	any number of characters
+**	any number of directories
+Build/**/*.csproj - means it will search in all directories for .csproj files
+
+Reference:
+https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/file-matching-patterns?view=azure-devops
