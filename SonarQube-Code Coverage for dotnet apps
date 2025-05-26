@@ -1,0 +1,392 @@
+SonarQube Code Coverage for dotnet apps
+
+SonarQube-Code Coverage Implementation
+--------------------------------------
+To implement SonarQubbe code coverage 
+1)we need to have unit test cases in the project. 
+2)We need to generate a coverage file
+3) Make sure to run sonar Coverage and unit testing after the build of application
+For dotnet application we have VSTest task that will generate .Coverage file which will be automatically picked by Sonar Task
+By this the Code coverage will be displayed in the SonarQube
+
+Method1:
+********
+Using VSTest task from the build and on the agent server we need to have Visual studio Enterprise edition.We dont need to purchase the enterprise licence we just need to download it on the agent server and point vstest task to Enterprise. Because enterprise edition only generates code coverage file community and professional editions will not generate code coverage using VSTest task  please find below article from Microsoft.
+
+https://stackoverflow.com/questions/78778608/no-code-coverage-attachments-were-found-from-the-trx-files-on-self-hosted-agent
+
+https://visualstudio.microsoft.com/vs/compare/
+
+I used this simple blog to implement code coverage for dotnet
+https://docs.sonarsource.com/sonarqube-server/latest/analyzing-source-code/test-coverage/dotnet-test-coverage/
+
+Look at Extension for Azure Devops and Read it. and i implemented like below
+
+steps:
+
+
+# The below task will update the major to main just to run sonar. if this is not there then sonar will not run for major as it is free version
+  - powershell: |
+     $params = "$env:SONARQUBE_SCANNER_PARAMS" -replace '"sonar.branch.name":"[\w,/,-]*"\,?'
+     Write-Host "##vso[task.setvariable variable=SONARQUBE_SCANNER_PARAMS]$params"
+    displayName: 'Sonar Update to main branch'
+    condition: and(succeeded(), eq(variables['RunSonarQube'], 'Y'), eq(variables['IsQA'], 'true'))
+
+  
+  - task: sonarsource.sonarqube.15B84CA1-B62F-4A2A-A403-89B77A063157.SonarQubePrepare@7
+    displayName: 'Prepare analysis on SonarQube'
+    inputs:
+      SonarQube: 'MMswiftCore-Sonar-Free-Edition'
+      scannerMode: 'dotnet'
+      #dotnetScannerVersion: '*'
+      projectKey: 'MMswift-Core'
+      projectName: 'MMswift-Core'
+      extraProperties: |
+        # Additional properties that will be passed to the scanner, 
+        # Put one key=value per line, example:
+        sonar.exclusions=*/SyedTest,*/Database DLM,*/Database
+        #sonar.scanner.scanAll=false
+        # sonar.cs.vscoveragexml.reportsPaths=$(Build.SourcesDirectory)/TestResults/coverage.xml
+        # sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/TestResults/coverage.xml
+        #sonar.cs.opencover.reportsPaths=D:\Test\core.cobertura.xml
+        #sonar.cs.opencover.reportsPaths=$(Agent.TempDirectory)/**/*.coverage.xml
+        #sonar.cs.vstest.reportsPaths=$(Agent.TempDirectory)/*.trx
+    condition: and(succeeded(), eq(variables['RunSonarQube'], 'Y'), eq(variables['IsQA'], 'true'))
+
+  - task: MSBuild@1
+    displayName: 'Build solution MMswift .NET/MMswift .NET.sln'
+    inputs:
+      solution: 'MMswift .NET/MMswift .NET.sln'
+      msbuildLocationMethod: location
+      msbuildLocation: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe'
+      platform: '$(BuildPlatform)'
+      configuration: '$(BuildConfiguration)'
+      msbuildArguments: '/p:DeployOnBuild=true /p:IncrementalBuild=true /p:PackageAsSingleFile=False'
+      clean: true
+    enabled: true
+
+  - task: VSTest@2
+    displayName: 'Test Assemblies **\website\bin\*.Tests.dll'
+    condition: eq(variables['RunTest'], 'Y')
+    inputs:
+      testAssemblyVer2: '*.Tests.dll'
+      searchFolder: '$(System.DefaultWorkingDirectory)\MMswift .NET\website\bin'
+      vstestLocationMethod: location
+      vstestLocation: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe'
+      pathtoCustomTestAdapters: '$(Build.SourcesDirectory)\MMswift .NET\website\bin'
+      runInParallel: true
+      codeCoverageEnabled: true
+      platform: '$(BuildPlatform)'
+      configuration: '$(BuildConfiguration)'
+    continueOnError: true
+    enabled: true
+
+
+  - task: JavaToolInstaller@0
+    displayName: 'Use Java 17'
+    inputs:
+      versionSpec: 17
+      jdkArchitectureOption: x64
+      jdkSourceOption: PreInstalled
+    condition: and(succeeded(), eq(variables['RunSonarQube'], 'Y'), eq(variables['IsQA'], 'true'))
+
+# # The below task will update the major to main just to run sonar. if this is not there then sonar will not run for major as it is free version
+#   - powershell: |
+#      $params = "$env:SONARQUBE_SCANNER_PARAMS" -replace '"sonar.branch.name":"[\w,/,-]*"\,?'
+#      Write-Host "##vso[task.setvariable variable=SONARQUBE_SCANNER_PARAMS]$params"
+#     displayName: 'Sonar Update to main branch'
+#     condition: and(succeeded(), eq(variables['RunSonarQube'], 'Y'), eq(variables['IsQA'], 'true'))
+
+  - task: sonarsource.sonarqube.6D01813A-9589-4B15-8491-8164AEB38055.SonarQubeAnalyze@7
+    displayName: 'Run Code Analysis'
+    inputs:
+      jdkversion: 'JAVA_HOME_17_X64'
+    condition: and(succeeded(), eq(variables['RunSonarQube'], 'Y'), eq(variables['IsQA'], 'true'))
+
+  # - task: sonarsource.sonarqube.291ed61f-1ee4-45d3-b1b0-bf822d9095ef.SonarQubePublish@7
+  #   displayName: 'Publish Quality Gate Result'
+  #   inputs:
+  #     pollingTimeoutSec: 10000000
+  #   condition: and(succeeded(), eq(variables['RunSonarQube'], 'Y'), eq(variables['IsQA'], 'true'))
+
+
+
+Logs from the build - Sonar Run Analysis Task:
+--------------------------------------------
+Attempting to locate a test results (.trx) file... 
+Looking for TRX files in: D:\ado-agents\Server1\Agent-1\1\TestResults, D:\ado-agents\server1\Agent-1\1\s\TestResults 
+The following test results files were found: D:\ado-agents\server1\Agent-1\1\s\TestResults\tfsbuild_PDC-TFS-AGTQ1_2025-05-23_07_42_56.trx 
+Absolute path to coverage file: D:\ado-agents\server1\Agent-1\1\s\TestResults\tfsbuild_PDC-TFS-AGTQ1_2025-05-23_07_42_56\In\PDC-TFS-AGTQ1\tfsbuild_PDC-TFS-AGTQ1_2025-05-23.07_43_19.coverage 
+The following code coverage attachments were found from the trx files: D:\ado-agents\server1\Agent-1\1\s\TestResults\tfsbuild_PDC-TFS-AGTQ1_2025-05-23_07_42_56\In\PDC-TFS-AGTQ1\tfsbuild_PDC-TFS-AGTQ1_2025-05-23.07_43_19.coverage 
+Not using the fallback mechanism to detect binary coverage files. 
+Converting coverage file 'D:\ado-agents\server1\Agent-1\1\s\TestResults\tfsbuild_PDC-TFS-AGTQ1_2025-05-23_07_42_56\In\PDC-TFS-AGTQ1\tfsbuild_PDC-TFS-AGTQ1_2025-05-23.07_43_19.coverage' to 'D:\ado-agents\server1\Agent-1\1\s\TestResults\tfsbuild_PDC-TFS-AGTQ1_2025-05-23_07_42_56\In\PDC-TFS-AGTQ1\tfsbuild_PDC-TFS-AGTQ1_2025-05-23.07_43_19.coveragexml'. 
+Coverage report conversion completed successfully. 
+
+
+This generated coverage on Sonar Qube Dashboard.
+
+=============================================================================================================
+
+
+Method2:
+********
+
+We can use DotNetCoreCLI@2 task and generate coverage file
+
+2)	Using DotnetcoreTask 
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Generate Coverage1'
+    inputs:
+      command: 'test'
+      projects: |
+        **/*Tests.csproj
+        **/*Test*.csproj
+        **/*Test.csproj         
+        !**/*SpecFlow.Tests.csproj
+      arguments: '--collect:"Code Coverage"'
+    condition: and(succeeded(), eq(variables['RunSonarQube'], 'Y'), eq(variables['IsQA'], 'true'))
+    continueOnError: true
+    enabled: true
+
+Here is the yaml Code:
+
+steps:
+
+# The below task will update the major to main just to run sonar. if this is not there then sonar will not run for major as it is free version
+  - powershell: |
+     $params = "$env:SONARQUBE_SCANNER_PARAMS" -replace '"sonar.branch.name":"[\w,/,-]*"\,?'
+     Write-Host "##vso[task.setvariable variable=SONARQUBE_SCANNER_PARAMS]$params"
+    displayName: 'Sonar Update to main branch'
+    condition: and(succeeded(), eq(variables['RunSonarQube'], 'Y'), eq(variables['IsQA'], 'true'))
+
+  - task: PowerShell@2
+    inputs:
+      targetType: 'inline'
+      script: |
+        # Define paths
+        
+        $testResultsPath = "$(Build.SourcesDirectory)/TestResults/**/"
+        $tempDirectoryPath = "$(Agent.TempDirectory)/**/"
+        
+        # Function to delete .trx files from a given path
+        function Delete-TrxFiles($path) {
+            if (Test-Path $path) {
+                $trxFiles = Get-ChildItem -Path $path -Filter *.trx -Recurse -ErrorAction SilentlyContinue
+                Write-Host "File present are $trxFiles"
+                foreach ($file in $trxFiles) {
+                    try {
+                        Remove-Item -Path $file.FullName -Force -ErrorAction Stop
+                        Write-Host "Deleted: $($file.FullName)"
+                    } catch {
+                        Write-Warning "Failed to delete $($file.FullName): $_"
+                    }
+                }
+            } else {
+                Write-Host "Path not found: $path"
+            }
+        }
+        
+        # Delete .trx files from both directories
+        Delete-TrxFiles -path $testResultsPath
+        Delete-TrxFiles -path $tempDirectoryPath
+    displayName: 'Delete *.trx files if exist' 
+  
+  - task: sonarsource.sonarqube.15B84CA1-B62F-4A2A-A403-89B77A063157.SonarQubePrepare@7
+    displayName: 'Prepare analysis on SonarQube'
+    inputs:
+      SonarQube: 'MMswiftCore-Sonar-Free-Edition'
+      scannerMode: 'dotnet'
+      #dotnetScannerVersion: '*'
+      projectKey: 'MMswift-Core'
+      projectName: 'MMswift-Core'
+      extraProperties: |
+        # Additional properties that will be passed to the scanner, 
+        # Put one key=value per line, example:
+        sonar.exclusions=*/SyedTest,*/Database DLM,*/Database
+        # sonar.cs.vscoveragexml.reportsPaths=$(Build.SourcesDirectory)/TestResults/coverage.xml
+        # sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/TestResults/coverage.xml
+        #sonar.cs.opencover.reportsPaths=D:\Test\core.cobertura.xml
+        #sonar.cs.opencover.reportsPaths=$(Agent.TempDirectory)/**/*.coverage.xml
+        #sonar.cs.vstest.reportsPaths=$(Agent.TempDirectory)/*.trx
+    condition: and(succeeded(), eq(variables['RunSonarQube'], 'Y'), eq(variables['IsQA'], 'true'))
+
+
+  # - script: 'npm config set https-proxy http://proxy-cloud.pdchs.local:9092'
+  #   displayName: 'Setting Proxy for angular'
+  #   enabled: false
+  #   condition: and(succeeded(), eq(variables['AngularProxySet'], 'Y'))
+
+  # - task: VSTest@2
+  #   displayName: 'Test Assemblies **\website\bin\*.Tests.dll'
+  #   condition: eq(variables['RunTest'], 'Y')
+  #   inputs:
+  #     testAssemblyVer2: '*.Tests.dll'
+  #     searchFolder: '$(System.DefaultWorkingDirectory)\MMswift .NET\website\bin'
+  #     vstestLocationMethod: location
+  #     vstestLocation: 'C:\Program Files\Microsoft Visual Studio\2022\$(VsType)\Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe'
+  #     pathtoCustomTestAdapters: '$(Build.SourcesDirectory)\MMswift .NET\website\bin'
+  #     runInParallel: true
+  #     codeCoverageEnabled: true
+  #     platform: '$(BuildPlatform)'
+  #     configuration: '$(BuildConfiguration)'
+  #   continueOnError: true
+  #   enabled: true
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Generate Coverage1'
+    inputs:
+      command: 'test'
+      projects: |
+        **/*Tests.csproj
+        **/*Test*.csproj
+        **/*Test.csproj         
+        !**/*SpecFlow.Tests.csproj
+      arguments: '--collect:"Code Coverage"'
+    condition: and(succeeded(), eq(variables['RunSonarQube'], 'Y'), eq(variables['IsQA'], 'true'))
+    continueOnError: true
+    enabled: true
+
+  - task: PowerShell@2
+    inputs:
+      targetType: 'inline'
+      script: |
+        # Define paths
+        
+        $testResultsPath = "$(Build.SourcesDirectory)/TestResults/**/"
+        $tempDirectoryPath = "$(Agent.TempDirectory)/**/"
+        
+        # Function to delete .trx files from a given path
+        function Delete-TrxFiles($path) {
+            if (Test-Path $path) {
+                $trxFiles = Get-ChildItem -Path $path -Filter *.trx -Recurse -ErrorAction SilentlyContinue
+                Write-Host "File present are $trxFiles"
+                foreach ($file in $trxFiles) {
+                    try {
+                        Remove-Item -Path $file.FullName -Force -ErrorAction Stop
+                        Write-Host "Deleted: $($file.FullName)"
+                    } catch {
+                        Write-Warning "Failed to delete $($file.FullName): $_"
+                    }
+                }
+            } else {
+                Write-Host "Path not found: $path"
+            }
+        }
+        
+        # Delete .trx files from both directories
+        Delete-TrxFiles -path $testResultsPath
+        Delete-TrxFiles -path $tempDirectoryPath
+    displayName: 'Delete *.trx files if exist'
+  
+
+  - task: JavaToolInstaller@0
+    displayName: 'Use Java 17'
+    inputs:
+      versionSpec: 17
+      jdkArchitectureOption: x64
+      jdkSourceOption: PreInstalled
+    condition: and(succeeded(), eq(variables['RunSonarQube'], 'Y'), eq(variables['IsQA'], 'true'))
+
+# # The below task will update the major to main just to run sonar. if this is not there then sonar will not run for major as it is free version
+#   - powershell: |
+#      $params = "$env:SONARQUBE_SCANNER_PARAMS" -replace '"sonar.branch.name":"[\w,/,-]*"\,?'
+#      Write-Host "##vso[task.setvariable variable=SONARQUBE_SCANNER_PARAMS]$params"
+#     displayName: 'Sonar Update to main branch'
+#     condition: and(succeeded(), eq(variables['RunSonarQube'], 'Y'), eq(variables['IsQA'], 'true'))
+
+  - task: sonarsource.sonarqube.6D01813A-9589-4B15-8491-8164AEB38055.SonarQubeAnalyze@7
+    displayName: 'Run Code Analysis'
+    inputs:
+      jdkversion: 'JAVA_HOME_17_X64'
+    condition: and(succeeded(), eq(variables['RunSonarQube'], 'Y'), eq(variables['IsQA'], 'true'))
+
+  # - task: sonarsource.sonarqube.291ed61f-1ee4-45d3-b1b0-bf822d9095ef.SonarQubePublish@7
+  #   displayName: 'Publish Quality Gate Result'
+  #   inputs:
+  #     pollingTimeoutSec: 10000000
+  #   condition: and(succeeded(), eq(variables['RunSonarQube'], 'Y'), eq(variables['IsQA'], 'true'))
+
+
+
+
+Note: 
+If  we use both tasks VSTest and DotNetCoreCLI@2 Test task  and on agent server with we have  community or professional edition. Then we may think VS test will generate .trx file for test results and DotNetCoreCLI@2 will generate coverage file and we can use both. But here is what happens 
+vstest task of community and professional editions will generate .trx file but no coverage file to Build.SourcesDirectory\TestResults  folder. Dotnetcore Test task will generate .coverage file in Agent.TempDirectory  the sonar will pick .trx file from  Build.SourcesDirectory\TestResults   folder and will not pick .coverage file which is generated from DotNetCoreCLI@2 test task in Agent.TempDirectory even though we define in Sonar  Prepare Analysis task in extra properties section to collect the coverage file from Agent.TempDirectory . It will not collect and code coverage will not be shown on Sonar.
+
+Follow below approach
+a)	Use VS studio Enterprise edition on Agent server it generates both .trx file and coverage file into Bild.Sources\TestResults directory and it will be picked by Sonar.
+b)	Use only DotNetCoreCLI@2 Test task  and NO VStest task here. Sonar will pick the .trx files from Agent.TempDirectory. make sure you add a step to remove .trx files from Build.SourcesDirectory\TestResults  before Sonar Run analysis task. Then Sonar will pick the coverage file and % is displayed on Sonar Dashboard. 
+
+
+================================================================================================================================
+
+Method3
+*******
+We can refer to this site for sonar coverage tools.
+#https://docs.sonarsource.com/sonarqube-server/9.8/analyzing-source-code/test-coverage/dotnet-test-coverage/
+
+If we are want to generate code coverage for dotnet application then we need to use below.
+
+
+Step1: Generate coverage.xml file
+---------------------------------
+# Check whether TestResults Directory exist. Delete previous coverage reports. If TestResults directory not found creating new.
+$path = "$(Build.SourcesDirectory)\TestResults"
+
+# Check if the directory exists
+if (Test-Path $path) {
+    # Get all .xml files in the directory
+    $xmlFiles = Get-ChildItem -Path $path -Filter *.xml
+    
+    # Check if any .xml files exist
+    if ($xmlFiles) {
+        # Delete each .xml file
+        foreach ($file in $xmlFiles) {
+            Remove-Item $file.FullName -Force
+            Write-Host "Deleted: $($file.FullName)"
+        }
+    } else {
+        Write-Host "No .xml files found in the directory."
+    }
+} else {
+    Write-Host "The specified path does not exist."
+    New-Item -Path "$(Build.SourcesDirectory)\TestResults" -ItemType Directory -Force
+
+}
+
+# We are using dotnet-coverage tool to run unit tests and generate coverage.xml file.
+
+# Search for all '*Tests.csproj' files recursively and store in an array
+$testProjects = Get-ChildItem -Path "$(Build.SourcesDirectory)\" -Recurse -Filter "*Tests.csproj"
+
+# Display each project one by one
+foreach ($project in $testProjects) {
+    Write-Output $project.FullName
+    #sleep 1
+    #$a = 1
+    dotnet-coverage collect dotnet test $project.FullName -f xml  -o $(Build.SourcesDirectory)\TestResults\$project-coverage.xml
+}
+
+cd "$(Build.SourcesDirectory)\TestResults\"
+dotnet-coverage merge *.xml --recursive --output $(Build.SourcesDirectory)\TestResults\coverage.xml --output-format xml
+
+
+Step2: Define Coverage.xml file in the SonarQubePrepare Task:
+---------------------------------------------------------------
+
+ - task: sonarsource.sonarqube.15B84CA1-B62F-4A2A-A403-89B77A063157.SonarQubePrepare@5
+    displayName: 'Prepare analysis on SonarQube'
+    inputs:
+      SonarQube: 'AswiftCore-Sonar-Free-Edition'
+      #scannerMode: 'dotnet'
+      #dotnetScannerVersion: '*'
+      projectKey: 'Aswift-Core'
+      projectName: 'Aswift-Core'
+      extraProperties: |
+       # Additional properties that will be passed to the scanner, 
+       # Put one key=value per line, example:
+       # sonar.exclusions=**/*.bin, */SyedTest,*/Database DLM,*/Database
+        sonar.cs.vscoveragexml.reportsPaths=$(Build.SourcesDirectory)/TestResults/coverage.xml
+        sonar.qualitygate.wait=true 
+    condition: and(succeeded(), eq(variables['RunSonarQube'], 'Y'), eq(variables['IsQA'], 'true'))
