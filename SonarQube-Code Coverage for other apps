@@ -1,4 +1,4 @@
-SonarQube-Code Coverage Implementation
+SonarQube-Code Coverage for other apps
 --------------------------------------
 To implement SonarQubbe code coverage 
 1)we need to have unit test cases in the project. 
@@ -12,70 +12,6 @@ By this the Code coverage will be displayed in the SonarQube
 Example:
 We can refer to this site for sonar coverage tools.
 #https://docs.sonarsource.com/sonarqube-server/9.8/analyzing-source-code/test-coverage/dotnet-test-coverage/
-
-If we are want to generate code coverage for dotnet application then we need to use below.
-
-Step1: Generate coverage.xml file
----------------------------------
-# Check whether TestResults Directory exist. Delete previous coverage reports. If TestResults directory not found creating new.
-$path = "$(Build.SourcesDirectory)\TestResults"
-
-# Check if the directory exists
-if (Test-Path $path) {
-    # Get all .xml files in the directory
-    $xmlFiles = Get-ChildItem -Path $path -Filter *.xml
-    
-    # Check if any .xml files exist
-    if ($xmlFiles) {
-        # Delete each .xml file
-        foreach ($file in $xmlFiles) {
-            Remove-Item $file.FullName -Force
-            Write-Host "Deleted: $($file.FullName)"
-        }
-    } else {
-        Write-Host "No .xml files found in the directory."
-    }
-} else {
-    Write-Host "The specified path does not exist."
-    New-Item -Path "$(Build.SourcesDirectory)\TestResults" -ItemType Directory -Force
-
-}
-
-# We are using dotnet-coverage tool to run unit tests and generate coverage.xml file.
-
-# Search for all '*Tests.csproj' files recursively and store in an array
-$testProjects = Get-ChildItem -Path "$(Build.SourcesDirectory)\" -Recurse -Filter "*Tests.csproj"
-
-# Display each project one by one
-foreach ($project in $testProjects) {
-    Write-Output $project.FullName
-    #sleep 1
-    #$a = 1
-    dotnet-coverage collect dotnet test $project.FullName -f xml  -o $(Build.SourcesDirectory)\TestResults\$project-coverage.xml
-}
-
-cd "$(Build.SourcesDirectory)\TestResults\"
-dotnet-coverage merge *.xml --recursive --output $(Build.SourcesDirectory)\TestResults\coverage.xml --output-format xml
-
-
-Step2: Define Coverage.xml file in the SonarQubePrepare Task:
----------------------------------------------------------------
-
- - task: sonarsource.sonarqube.15B84CA1-B62F-4A2A-A403-89B77A063157.SonarQubePrepare@5
-    displayName: 'Prepare analysis on SonarQube'
-    inputs:
-      SonarQube: 'AswiftCore-Sonar-Free-Edition'
-      #scannerMode: 'dotnet'
-      #dotnetScannerVersion: '*'
-      projectKey: 'Aswift-Core'
-      projectName: 'Aswift-Core'
-      extraProperties: |
-       # Additional properties that will be passed to the scanner, 
-       # Put one key=value per line, example:
-       # sonar.exclusions=**/*.bin, */SyedTest,*/Database DLM,*/Database
-        sonar.cs.vscoveragexml.reportsPaths=$(Build.SourcesDirectory)/TestResults/coverage.xml
-        sonar.qualitygate.wait=true 
-    condition: and(succeeded(), eq(variables['RunSonarQube'], 'Y'), eq(variables['IsQA'], 'true'))
 
 Example2: If we are using only angualar application
 ----------------------------------------------------
