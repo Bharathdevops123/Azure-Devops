@@ -1,29 +1,29 @@
 #ADO-API-AttachWorkitemidifnotexistToPullRequest Through API in Azure Devops
 #$(pullRequestId) # This value we will get from Create Pull Request task
 # Variables
-$organization = "Mswiftdev"    # Replace with your Azure DevOps organization name
-$project = "Mswift .NET"              # Replace with your Azure DevOps project name
-$repository = "Mswift-core"        # Replace with your repository name
+$organization = "ProjectAdev"    # Replace with your Azure DevOps organization name
+$project = "ProjectA .NET"              # Replace with your Azure DevOps project name
+$repository = "ProjectA-core"        # Replace with your repository name
 $prId = "$(pullRequestId)"                     # This we will get from the Task Create Pull Request
 $workItemId = $(pr-mergeworkitemID)                          # Replace with your Work Item ID
 $personalAccessToken = "oebwosvgor7ez5mcr4v2woxox"  # Replace with your Azure DevOps PAT. This PAT created using Mfsbuild ID and the PAT name : AutoApprovePullRequest.
-$EmailList = $(pr-EmailList) #Multiple Emailid are comma separated Eg: 'MedojuB2@Mswift.com','Sali@Mswift.com'
+$EmailList = $(pr-EmailList) #Multiple Emailid are comma separated Eg: 'MedojuB2@ProjectA.com','Sali@ProjectA.com'
 $apiVersion = "?api-version=7.1-preview"
 # Azure DevOps REST API URL to add a comment to a PR
-$PullRequestapiurl = "https://ado.Mswift.com:8080/tfs/$organization/$project/_apis/git/repositories/$repository/pullrequests/$prId$apiVersion"
-$WorkitemapiUrl = "https://ado.Mswift.com:8080/tfs/$organization/$project/_apis/git/repositories/$repository/pullrequests/$prId/workitems$apiVersion"
+$PullRequestapiurl = "https://ado.ProjectA.com:8080/tfs/$organization/$project/_apis/git/repositories/$repository/pullrequests/$prId$apiVersion"
+$WorkitemapiUrl = "https://ado.ProjectA.com:8080/tfs/$organization/$project/_apis/git/repositories/$repository/pullrequests/$prId/workitems$apiVersion"
 
 #Send Email Function
 function SendEmail($Message, $body)
 {
-#$EmailList = 'MedojuB2@Mswift.com'
+#$EmailList = 'MedojuB2@ProjectA.com'
 
 $secpasswd = ConvertTo-SecureString "BPAElzLCY6yLeD2kb8pB8a+8238xx9VKHJzK+Zxkwdi" -AsPlainText -Force
 $cred = New-Object System.Management.Automation.PSCredential ("AKIA5L3RC3457YA5AB", $secpasswd)
 
 #Send email
 Import-Module Microsoft.PowerShell.Utility
-Send-MailMessage -From 'tfs@Mswift.com' -To $EmailList -Subject $Message -Body "Hi,
+Send-MailMessage -From 'tfs@ProjectA.com' -To $EmailList -Subject $Message -Body "Hi,
 
 $body.
 
@@ -71,8 +71,8 @@ if ($prId)
         $message1 = "WorkItem Already Exist to PR: $prId "
         $body1 = "WorkItem Already Exist to PR: $prId 
         `nBuild Pipeline Name: $(Build.DefinitionName) 
-        `nBuild Url: https://ado.Mswift.com:8080/tfs/Mswiftdev/Mswift%20.NET/_build/results?buildId=$(Build.BuildId)&view=results 
-        `nPullRequest Url https://ado.Mswift.com:8080/tfs/Mswiftdev/Mswift%20.NET/_git/Mswift-core/pullrequest/$prId"
+        `nBuild Url: https://ado.ProjectA.com:8080/tfs/ProjectAdev/ProjectA%20.NET/_build/results?buildId=$(Build.BuildId)&view=results 
+        `nPullRequest Url https://ado.ProjectA.com:8080/tfs/ProjectAdev/ProjectA%20.NET/_git/ProjectA-core/pullrequest/$prId"
         SendEmail $message1 $body1
 
          } 
@@ -93,7 +93,7 @@ $url= $response.artifactId
 #Write-Host ArtifactID is $url
     
 
-$requestUri = "https://ado.Mswift.com:8080/tfs/$organization/_apis/wit/workitems/${workitemid}?api-version=7.1-preview.3"
+$requestUri = "https://ado.ProjectA.com:8080/tfs/$organization/_apis/wit/workitems/${workitemid}?api-version=7.1-preview.3"
 
 $json = @"
 [ {
@@ -114,8 +114,8 @@ Write-Host "*** Work Item ID: $workItemId is ATTACHED to the PR: $prId ***"
 $message2 = "WorkItem $workItemId ATTACHED to PR: $prId"
 $body2 = "WorkItem $workItemId ATTACHED to PR: $prId 
         `nBuild Pipeline Name: $(Build.DefinitionName) 
-        `nBuild Url: https://ado.Mswift.com:8080/tfs/Mswiftdev/Mswift%20.NET/_build/results?buildId=$(Build.BuildId)&view=results 
-        `nPullRequest Url https://ado.Mswift.com:8080/tfs/Mswiftdev/Mswift%20.NET/_git/Mswift-core/pullrequest/$prId"
+        `nBuild Url: https://ado.ProjectA.com:8080/tfs/ProjectAdev/ProjectA%20.NET/_build/results?buildId=$(Build.BuildId)&view=results 
+        `nPullRequest Url https://ado.ProjectA.com:8080/tfs/ProjectAdev/ProjectA%20.NET/_git/ProjectA-core/pullrequest/$prId"
 SendEmail $message2 $body2
 
          }
