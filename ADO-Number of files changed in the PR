@@ -1,0 +1,26 @@
+
+# Configuration - Update with your Azure DevOps organization, project, and repository details
+$organization = "Projectnamedev"  # Replace with your Azure DevOps organization name
+$project = "Projectname .NET"            # Replace with your Azure DevOps project name
+$repository = "Projectname-core"      # Replace with your repository name
+$prId = 17721                        # Replace with your PR ID
+$patToken = "oebwosvgor7ez5mcr4v2woxoxdrmnzsonklklo"  # Replace with your Azure DevOps PAT
+
+# Headers with the PAT for authentication
+$headers = @{
+    "Content-Type" = "application/json"
+    "Authorization" = "Basic " + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$patToken"))
+}
+
+
+$apiVersion = "?api-version=7.1-preview"
+
+
+# Define the REST API URL to check no of iterations. 
+#https://ado.Projectname.com:8080/tfs/Projectnamedev/Projectname%20.NET/_apis/git/repositories/Projectname-core/pullrequests/17667/iterations/1/changes?api-version=7.1
+$Fileschangeduri = "https://ado.Projectname.com:8080/tfs/$organization/$project/_apis/git/repositories/$repository/pullrequests/$prId/iterations/1/changes$apiVersion"
+echo $Fileschangeduri
+
+# Make the GET request to get PR details
+$FileschangedUriResponse = Invoke-RestMethod -Uri $Fileschangeduri -Method Get -Headers $headers -ContentType "application/json"
+echo $FileschangedUriResponse.changeEntries.Count
