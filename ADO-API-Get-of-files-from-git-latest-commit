@@ -1,0 +1,32 @@
+$base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$personalAccessToken"))
+
+D:
+cd $(Build.ArtifactStagingDirectory)
+git -c http.extraHeader="Authorization: Basic $base64AuthInfo" clone "https://ado.Projectname.com:8080/tfs/Projectnamedev/Projectname%20.NET/_git/Projectname-core" $(Build.ArtifactStagingDirectory)
+Write-Host We are on branch
+git branch
+Write-Host Switching to $TargetBranch
+git checkout $TargetBranch
+Write-Host ***We are on branch***
+git branch
+git pull $TargetBranch
+$mergeCommit = git log $TargetBranch --merges -n 1 --pretty=format:"%H"
+Write-Output $mergeCommit
+# Get number of files changed in that merge commit
+$statLine1 = git show --stat --oneline $mergeCommit | Select-String -Pattern "files? changed"
+echo $statLine1
+if ($statLine1) {
+    $numFilesChanged = ($statLine1 -split " ")[1]
+    #Write-Output $numFilesChanged
+    Write-host "no of files changed: $numFilesChanged"
+
+    }
+
+$statLine2 = git show --stat --oneline $mergeCommit | Select-String -Pattern "Merged?"
+
+if ($statLine2) {
+    
+    #Write-Output $statLine2
+    Write-host "Changeset Details: $statLine2"
+
+    }
