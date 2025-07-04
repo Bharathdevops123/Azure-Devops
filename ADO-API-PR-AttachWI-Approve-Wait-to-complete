@@ -27,8 +27,8 @@
    {
    #$EmailList = 'MedojuB2@<Projectname>.com'
    
-$secpasswd = ConvertTo-SecureString "<AwSPassword>" -AsPlainText -Force
-$cred = New-Object System.Management.Automation.PSCredential ("<AWS UserID>", $secpasswd)
+   $secpasswd = ConvertTo-SecureString "<AwSPassword>" -AsPlainText -Force
+   $cred = New-Object System.Management.Automation.PSCredential ("<AWS UserID>", $secpasswd)
    
    #Send email
    Import-Module Microsoft.PowerShell.Utility
