@@ -1,0 +1,47 @@
+
+trigger:
+- none
+
+
+parameters:
+- name: FolderDate
+  type: string
+  default: '20202020'
+  displayName: 'FolderDate'
+  values:
+  - '20202020'
+  - '20250919'
+  - '20251212'
+
+- name: myMultiSelectList
+  type: object
+  default:
+    Apple: true
+    Ball: true
+    Cat: false
+
+jobs:
+- job: DropDownlistJob_1
+  condition: eq('${{ parameters.FolderDate }}', '20250919')
+  steps:
+    - script: echo "Running 20250919"
+
+- job: DropDownlistJob_2
+  condition: eq('${{ parameters.FolderDate }}', '20251212')
+  steps:
+    - script: echo "Running 20251212"
+
+- job: Multiselect_1
+  condition: and(succeeded(), eq('${{ parameters.myMultiSelectList.Apple }}', true))
+  steps:
+    - script: echo "Running Apple job"
+
+- job: Multiselect_2
+  condition: and(succeeded(), eq('${{ parameters.myMultiSelectList.Ball }}', true))
+  steps:
+    - script: echo "Running Apple Ball"
+
+- job: Job_Cat
+  condition: and(succeeded(), eq('${{ parameters.myMultiSelectList.Cat }}', true))
+  steps:
+    - script: echo "Running Cat job"
