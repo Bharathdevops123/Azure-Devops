@@ -12,6 +12,7 @@ parameters:
   - '20202020'
   - '20250919'
   - '20251212'
+  #if we have more dates it will be displayed as Drop down if there are 2 or 3 then it will be displayed as circlecheckbox we can able to select it
 
 - name: myMultiSelectList
   type: object
