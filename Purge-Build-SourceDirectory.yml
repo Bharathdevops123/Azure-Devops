@@ -1,0 +1,41 @@
+steps:
+ 
+- powershell: |
+
+   #Cleaning Build.Sources Directory      
+   $BuildSourceDirectory = "$(Build.SourcesDirectory)" # Replace with the actual path
+   $EmptyDirPath = "D:\EmptyDir"
+    if (Test-Path $BuildSourceDirectory) 
+    { # Check if the directory exists
+        if ((Get-ChildItem -Path $BuildSourceDirectory -Force | Measure-Object).Count -eq 0) 
+        {
+            Write-Host "The directory '$BuildSourceDirectory' is empty."
+        } 
+        else 
+        {
+            Write-Host "The directory '$BuildSourceDirectory' is not empty."
+            if (Test-Path -Path $EmptyDirPath -PathType Container)
+            {
+            Write-Host "Empty Dir Exist ...Cleaning Source staging Directory"
+            robocopy D:\EmptyDir $(Build.SourcesDirectory)\ /mir /purge
+            Remove-Item -Path D:\EmptyDir -Recurse -Force -Verbose
+            exit 0
+            }
+            else
+            {
+            Write-Host "***Empty Dir DO Not Exist, Creating it and Cleaning Source staging Directory***"
+            New-Item -Path "D:\" -Name "EmptyDir" -ItemType "directory" -Verbose
+            robocopy D:\EmptyDir $(Build.SourcesDirectory)\ /mir /purge
+            Remove-Item -Path D:\EmptyDir -Recurse -Force -Verbose
+            exit 0
+            }
+        }
+    }
+    else
+    {
+    Write-Host "The directory '$BuildSourceDirectory' does not exist."
+    }
+
+  
+  displayName: 'Purge $(Build.SourcesDirectory)\ Directory'
+  condition: always()

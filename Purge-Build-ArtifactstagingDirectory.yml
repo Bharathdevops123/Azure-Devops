@@ -1,0 +1,37 @@
+steps:
+- powershell: |
+   #We have to clean Artifact staging Directory as we used that for log purpose         
+   $ArtifactStagingDirectory = "$(Build.ArtifactStagingDirectory)" # Replace with the actual path
+   $EmptyDirPath = "D:\EmptyDir"
+    if (Test-Path $ArtifactStagingDirectory) 
+    { # Check if the directory exists
+        if ((Get-ChildItem -Path $ArtifactStagingDirectory -Force | Measure-Object).Count -eq 0) 
+        {
+            Write-Host "The directory '$ArtifactStagingDirectory' is empty."
+        } 
+        else 
+        {
+            Write-Host "The directory '$ArtifactStagingDirectory' is not empty."
+            if (Test-Path -Path $EmptyDirPath -PathType Container)
+            {
+            Write-Host "Empty Dir Exist ...Cleaning Artifact staging Directory"
+            robocopy D:\EmptyDir $(Build.ArtifactStagingDirectory)\ /mir /purge
+            Remove-Item -Path D:\EmptyDir -Recurse -Force -Verbose
+            exit 0
+            }
+            else
+            {
+            Write-Host "***Empty Dir DO Not Exist, Creating it and Cleaning Artifact staging Directory***"
+            New-Item -Path "D:\" -Name "EmptyDir" -ItemType "directory" -Verbose
+            robocopy D:\EmptyDir $(Build.ArtifactStagingDirectory)\ /mir /purge
+            Remove-Item -Path D:\EmptyDir -Recurse -Force -Verbose
+            exit 0
+            }
+        }
+    }
+    else
+    {
+    Write-Host "The directory '$ArtifactStagingDirectory' does not exist."
+    }
+  displayName: 'Purge $(Build.ArtifactStagingDirectory)'
+  condition: always()
